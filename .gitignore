@@ -1,0 +1,19 @@
+# Python 缓存与编译文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# C 语言编译文件
+*.exe
+*.obj
+*.o
+*.out
+
+# Java 编译文件
+*.class
+target/
+
+# 通用冗余文件
+.DS_Store
+*.log
