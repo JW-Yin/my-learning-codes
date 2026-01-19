@@ -13,7 +13,19 @@ __pycache__/
 # Java 编译文件
 *.class
 target/
+lib/
+.m2/
+*.jar
 
 # 通用冗余文件
 .DS_Store
 *.log
+
+# IDE 配置文件（比如 VS Code、IntelliJ IDEA）
+.idea/
+.vscode/
+*.iml
+
+# 测试与临时文件
+*.tmp
+*.bak
