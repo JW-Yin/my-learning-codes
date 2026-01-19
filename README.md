@@ -7,8 +7,8 @@
 
 
 ## python-learning
-记录我对 python 的积累与学习轨迹，目前包括：
-- 使用 python 对 txt / json / ini 文件进行读写操作
+记录我对 Python 的积累与学习轨迹，目前包括：
+- 使用 Python 对 txt / json / ini 文件进行读写操作
 - 使用 requests 对网页进行爬取
 - 使用 beautifulsoup 对爬取到的 html 页面进行特定标签的提取
 - 使用 argparse 给自己写的简单爬虫程序添加命令行参数解析
@@ -16,3 +16,6 @@
 - 使用 threading 给爬虫程序添加多线程支持，多个线程同时爬取、提取表单，效率直接翻倍
 - 使用 PyInstaller 把爬虫程序进行了打包，可以直接打包成一个 exe 文件，运行起来太方便了！
 - 学习了web安全相关内容，对爬虫程序进行了改造，升级成了漏洞扫描器，可以自动化爬取网页信息，提取表单，检测是否存在web漏洞，还添加了命令行参数解析、日志系统、多线程等相关内容
+
+## database-learning
+记录我对 Python 的积累与学习轨迹，目前包括：
