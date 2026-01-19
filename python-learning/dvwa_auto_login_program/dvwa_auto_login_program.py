@@ -46,14 +46,14 @@ def dvwa_auto_login(dvwa_base_url, username, password):
         # print(index_response.text)
 
         if "Welcome to DVWA" in index_response.text or "DVWA Security" in index_response.text:
-            print("✅ DVWA自动登录成功！")
+            print("DVWA自动登录成功！")
             return session
         else:
-            print("❌ DVWA自动登录失败，账号密码或环境配置有误")
+            print("DVWA自动登录失败，账号密码或环境配置有误")
             return None
 
     except Exception as e:
-        print(f"❌ 登录过程出现异常：{str(e)}")
+        print(f"登录过程出现异常：{str(e)}")
         return None
 
 # 调用函数执行自动登录
