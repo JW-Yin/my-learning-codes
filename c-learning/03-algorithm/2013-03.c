@@ -4,21 +4,26 @@
 */
 
 #include <stdio.h>
+#define MAXSIZE (int)1e7
+int ans[MAXSIZE];
 
+// 假设每个人的编号依次是0-1-2-3...
+int f(int n, int k)
+{
+    if (n == 1) return 0;
+
+    if (ans[n] == -1)
+        ans[n]=(ans[n-1]+k)%n;
+    return ans[n];
+}
 int main()
 {
-    // 从1个人开始，每次加1个人，用(当前答案 + k) % 当前人数就能得到新答案
-    int n, k=3;
-    scanf("%d", &n);
+    for (int i = 0; i < MAXSIZE; ++i) ans[i] = -1;
+    
+    int n, k = 3; scanf("%d", &n);
 
-    int ans = 0; // 当只剩下一个人时，编号为0（如果编号从0开始）
-    for (int i = 2; i <= n; i++)
-    {
-        ans = (ans + k) % i;
-    }
     // 如果编号从1开始，则 ans+1
-    printf("%d", ans+1);
-
+    printf("%d", f(n,k) + 1);
     return 0;
 }
 /*
