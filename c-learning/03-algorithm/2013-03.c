@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #define MAXSIZE (int)1e7
+
 int ans[MAXSIZE];
 
 // 假设每个人的编号依次是0-1-2-3...
