@@ -9,6 +9,6 @@ int main(){
         for(int b=1;b<100;++b)
             for(int c=1;c<100;++c)
                 if(c%3 == 0 && a*5 + b*3 + c/3 == 100 && a+b+c == 100)
-                    printf("rooster: %d,\nhen: %d,\nchick: %d",a,b,c);
+                    printf("rooster: %d,\nhen: %d,\nchick: %d\n",a,b,c);
     return 0;
 }
