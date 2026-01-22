@@ -5,33 +5,50 @@
 #include<stdio.h>
 #include<string.h>
 
-int main(){
-    char s1[100+1],s2[100+1];
-    scanf("%s %s",s1,s2);
-
-    int len1=strlen(s1),len2=strlen(s2);
+int main() {
+    char s1[101], s2[101];
+    scanf("%s %s", s1, s2);
     
-    int next[100+1]={-1,0};
-    for(int i=2;i<len2;++i){
-        int tag=i-1;
-        while(1){
-            if(tag < 0 || s2[i] == s2[tag]){
-                next[i]=next[tag]+1;
-                break;
-            }else tag = next[tag];
+    int len1 = strlen(s1), len2 = strlen(s2);
+    
+    // 特殊情况处理
+    if (len2 == 0) {
+        printf("YES");  // 空串是所有字符串的子串
+        return 0;
+    }
+    
+    // 计算next数组
+    int next[101] = {-1};
+    int i = 0, j = -1;
+    
+    while (i < len2) {
+        if (j == -1 || s2[i] == s2[j]) {
+            i++;
+            j++;
+            next[i] = j;
+        } else {
+            j = next[j];
         }
     }
-
-    for(int i=0,j=0 ;i<=len1;){
-        if(j == len2) {
-            printf("YES");
-            return 0;
-        } 
-        if(i == len1 )break;
-        if(j == -1 || s1[i] == s2[j]) i++,j++;
-        else j=next[j];
+    
+    // KMP匹配
+    i = 0, j = 0;
+    while (i < len1 && j < len2) {
+        if (j == -1 || s1[i] == s2[j]) {
+            i++;
+            j++;
+        } else {
+            j = next[j];
+        }
     }
-    printf("NO");
+    
+    // 输出结果
+    if (j == len2) {
+        printf("YES");
+    } else {
+        printf("NO");
+    }
+    
     return 0;
 }
 
