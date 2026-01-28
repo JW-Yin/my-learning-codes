@@ -143,7 +143,7 @@ $$
 **语法示例**：
 ```markdown
 ```mermaid
-graph TD  # TD=从上到下，LR=从左到右
+graph TD 
 A[开始] --> B[数据采集]
 B --> C{判断是否合法}
 C -->|是| D[数据处理]
@@ -151,7 +151,7 @@ C -->|否| E[报错退出]
 D --> F[结束]
 ```
 ```
-**核心说明**：Typora/Obsidian/GitHub 原生支持，`graph TD/LR` 控制方向。
+**核心说明**：Typora/Obsidian/GitHub 原生支持，`graph TD/LR` 控制方向(TD=从上到下，LR=从左到右)。
 
 ### Demo 15：时序图（Mermaid）
 **功能**：绘制接口/交互时序图
@@ -206,18 +206,6 @@ def hello():
 ```
 ```
 **核心说明**：代码块开头指定语言（python/java/c/sql），解析器自动高亮关键字。
-
-### Demo 20：代码块显示行号
-**功能**：给代码添加行号（部分编辑器支持）
-**语法示例**：
-```markdown
-```python linenums="1"
-a = 1
-b = 2
-print(a+b)
-```
-```
-**核心说明**：`linenums="1"` 表示从1开始编号，VS Code/Typora 支持。
 
 ---
 
