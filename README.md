@@ -1,5 +1,5 @@
 # my-learning-codes
-记录我的学习过程，包含 C 语言、Python 、Java 等作业与练习，体现积累与学习轨迹
+记录我的学习过程，包含 C 语言、Python 、Java 、数据库等作业与练习，体现积累与学习轨迹
 
 ## c-learning
 记录我对 C 语言的积累与学习轨迹，目前包括：
