@@ -1,36 +1,22 @@
-
-## Flameshot截图工具
-
-- 下载适配Ubuntu 24.04的deb包
-wget https://github.com/flameshot-org/flameshot/releases/download/v13.3.0/flameshot-13.3.0-1.ubuntu-24.04.amd64.deb
-
-- 安装并自动修复依赖
-sudo apt install -f ./flameshot-13.3.0-1.ubuntu-24.04.amd64.deb
-
 ## 安装 GIMP
-
 sudo apt install gimp -y
 
+# 安装 VLC（自动处理依赖）
+sudo apt install vlc -y
 
-## 安装 Flatpak
+# 安装所有视频可以正常播放
+sudo apt install ubuntu-restricted-extras
 
-sudo apt update && sudo apt install flatpak -y
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+# 安装显示优化（浏览器按alt+F2，输入r；进入extensions.gnome.org搜索Dash to dock进行安装）
+sudo apt install gnome-browser-connector
 
+# 安装包管理
+sudo apt install synaptic
 
-## 安装 wiliwili
+# 安装apt-fast（加速下载且避免锁冲突）
+sudo add-apt-repository ppa:apt-fast/stable
+sudo apt update
+sudo apt install apt-fast  
+    - 以后用apt-fast代替apt，如`apt-fast install vlc`
 
-这是Linux平台最受欢迎的B站客户端，功能全面、更新频繁，基于MPV播放器，性能优秀。
-1. 安装Flatpak（如未安装）
-    ```bash
-    sudo apt update && sudo apt install flatpak -y
-    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    ```
-2. 安装wiliwili
-    ```bash
-    flatpak install flathub cn.xfangfang.wiliwili -y
-    ```
-3. 启动与卸载
-    - 启动：应用菜单搜索“wiliwili”或执行 `flatpak run cn.xfangfang.wiliwili`
-    - 卸载：`flatpak uninstall cn.xfangfang.wiliwili`
 
