@@ -1,6 +1,16 @@
 
-## Ksnip截图工具
-sudo apt update && sudo apt install ksnip
+## Flameshot截图工具
+
+- 下载适配Ubuntu 24.04的deb包
+wget https://github.com/flameshot-org/flameshot/releases/download/v13.3.0/flameshot-13.3.0-1.ubuntu-24.04.amd64.deb
+
+- 安装并自动修复依赖
+sudo apt install -f ./flameshot-13.3.0-1.ubuntu-24.04.amd64.deb
+
+## 安装 GIMP
+
+sudo apt install gimp -y
+
 
 ## 安装 Flatpak
 
