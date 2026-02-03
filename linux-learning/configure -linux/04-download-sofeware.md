@@ -20,8 +20,7 @@
 ##### 安装操作
 - 下载：官网/GitHub下载对应架构（amd64）deb包
     - 图形化安装：双击deb包 → 软件中心点击「安装」
-    - 命令行安装：`sudo dpkg -i deb包文件名.deb` (**注意**：dpkg 是底层工具，不具备自动解决软件依赖的能力—— 如果要安装的 deb 包依赖其他未安装的库 / 软件，直接执行 sudo dpkg -i 会报错（提示 “依赖关系未满足”），安装失败后，执行`sudo apt -f install`自动补全依赖，修复安装)
-
+    - 命令行安装：`sudo apt install deb包文件名.deb` 
 ##### 卸载操作（同APT）
 - 普通卸载：`sudo apt remove 软件名`
 - 彻底卸载：`sudo apt purge 软件名`
