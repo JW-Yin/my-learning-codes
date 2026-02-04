@@ -1,16 +1,26 @@
-# 安装包管理工具（二选一）
-- sudo apt install plasma-discover
-- sudo apt install synaptic
-
-# 安装从官网下载的.deb包
-- 从u盘或官网找到所有需要的.deb包，依次执行sudo apt install 软件名.deb
-
-
 # 安装apt-fast（加速下载且避免锁冲突）
 sudo add-apt-repository ppa:apt-fast/stable
 sudo apt update
 sudo apt install apt-fast  
     - 以后用apt-fast代替apt，如`apt-fast install vlc`
 
+# 安装依赖自动管理工具 aptitude
+`sudo apt-get install aptitude`
+- 以后再安装使用`sudo aptitude install <package_name>`
+
+# 安装图形化包管理工具
+1. `sudo apt upgrade -y`
+2. `sudo apt install plasma-discover -y`
+
+# 安装pig_cha
+1. 去这里注册账号并且下载`.deb`包：`https://link.vtlovenet.xyz/register?share_id=5799cb22-c501-4fe2-8414-786e3b5aa3f2&lang=zh`
+1. `sudo apt install libappindicator3-1 -y`
+1. `sudo dpkg -i ViewTurboLite_amd64.deb`
 
 
+# gimp图像编辑工具（去plasma-discover中下载）
+
+# 安装完整的音乐解码库
+```
+sudo apt update && sudo apt install gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-libav ffmpeg
+```
