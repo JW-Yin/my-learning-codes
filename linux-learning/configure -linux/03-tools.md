@@ -6,7 +6,7 @@ sudo apt install apt-fast
 
 # 安装依赖自动管理工具 aptitude
 `sudo apt-get install aptitude`
-- 以后再安装使用`sudo aptitude install <package_name>`
+- 以后再安装任何东西都可以使用`sudo aptitude install <package_name>`，等价替换`sudo apt install <package_name>`
 
 # 安装图形化包管理工具
 1. `sudo apt upgrade -y`
@@ -17,6 +17,8 @@ sudo apt install apt-fast
 1. `sudo apt install libappindicator3-1 -y`
 1. `sudo dpkg -i ViewTurboLite_amd64.deb`
 
+# C语言开发环境
+`sudo apt install build-essential -y`
 
 # gimp图像编辑工具（去plasma-discover中下载）
 
