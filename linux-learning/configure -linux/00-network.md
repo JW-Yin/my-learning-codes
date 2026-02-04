@@ -1,60 +1,49 @@
+# Ubuntu 网络配置梳理
 
-### 先更换ubuntu的下载源
+## 一、更换Ubuntu下载源（清华源）
+### 作用
+提升软件下载/更新速度，解决官方源访问慢、卡顿的问题。
+### 操作步骤
+1. 备份原有源文件（防止修改出错可恢复）：
+   ```bash
+   sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+   ```
 
----
+2. 编辑源配置文件：
+   ```bash
+   sudo nano /etc/apt/sources.list
+   ```
 
-### 第一步：先确认你的无线网卡型号（精准定位问题）
-打开终端执行：
-```bash
-lspci | grep Network
-```
----
-
-### 第二步：关闭无线网卡节能模式（最常见原因）
-Ubuntu默认开启了网卡节能，会在闲置时自动休眠断网，这是“断网后自动恢复”的直接原因。
-
-**永久关闭（重启后依然生效，推荐）**
+3. 将文件内原有内容替换为**对应Ubuntu版本的清华源**：
     ```bash
-    sudo nano /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+    deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
+    deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+    deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+    deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse
     ```
-    将文件中的 `wifi.powersave = 3` 改为 `wifi.powersave = 2`，保存退出（`Ctrl+O` → `Ctrl+X`），然后重启网络管理器：
-    ```bash
-    sudo systemctl restart NetworkManager
-    ```
 
----
+4. 更新源缓存（使新源生效）：
+   ```bash
+   sudo apt update
+   ```
+5. 升级系统已安装包：
+   ```bash
+   sudo apt upgrade
+   ```
 
-### 第三步：安装适配的第三方驱动（解决网速慢+断网的核心）
-开源驱动对RTL8852AE的稳定性和速度优化不足，需要安装社区维护的专用驱动：
-1.  先安装依赖工具（如果之前没装`build-essential`，先执行这步）：
-    ```bash
-    sudo apt update && sudo apt install git build-essential -y
-    ```
-2.  下载并安装适配驱动（这是目前最稳定的RTL8852AE驱动）：
-    ```bash
-    git clone https://github.com/lwfinger/rtw89.git
-    cd rtw89
-    make
-    sudo make install
-    ```
-3.  重启电脑，驱动会自动加载，此时网速和稳定性会大幅提升。
 
----
 
-### 第四步：优化网络管理器配置（避免频繁漫游断网）
-如果仍偶尔断网，是因为网络管理器对弱信号的漫游策略太敏感，可调整：
-```bash
-sudo nano /etc/NetworkManager/conf.d/99-wifi-roaming.conf
-```
-粘贴以下内容：
-```ini
-[connection]
-wifi.roaming-strategy=1
-wifi.scan-rand-mac-address=no
-```
-保存退出后，重启网络管理器：
-```bash
-sudo systemctl restart NetworkManager
-```
-
----
+## 二、关闭无线网卡节能模式（解决偶尔断网问题）
+### 问题原因
+Ubuntu默认开启无线网卡节能，闲置时网卡自动休眠，导致“断网后自动恢复”或间歇性断网，这是该类断网的最常见诱因。
+### 操作方式（永久关闭，重启后仍生效，推荐）
+1. 编辑网卡节能配置文件：
+   ```bash
+   sudo nano /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+   ```
+2. 修改配置项：将文件中 `wifi.powersave = 3` 改为 `wifi.powersave = 2`；
+3. 保存并退出nano编辑器：按 `Ctrl+O` 保存 → 按 `Ctrl+X` 退出；
+4. 重启网络管理器使配置生效：
+   ```bash
+   sudo systemctl restart NetworkManager
+   ```
