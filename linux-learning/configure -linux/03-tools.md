@@ -1,22 +1,16 @@
-## 安装 GIMP
-sudo apt install gimp -y
+# 安装包管理工具（二选一）
+- sudo apt install plasma-discover
+- sudo apt install synaptic
 
-# 安装 VLC（自动处理依赖）
-sudo apt install vlc -y
+# 安装从官网下载的.deb包
+- 从u盘或官网找到所有需要的.deb包，依次执行sudo apt install 软件名.deb
 
-# 安装所有视频可以正常播放
-sudo apt install ubuntu-restricted-extras
-
-# 安装显示优化（浏览器按alt+F2，输入r；进入extensions.gnome.org搜索Dash to dock进行安装）
-sudo apt install gnome-browser-connector
-
-# 安装包管理
-sudo apt install synaptic
 
 # 安装apt-fast（加速下载且避免锁冲突）
 sudo add-apt-repository ppa:apt-fast/stable
 sudo apt update
 sudo apt install apt-fast  
     - 以后用apt-fast代替apt，如`apt-fast install vlc`
+
 
 
