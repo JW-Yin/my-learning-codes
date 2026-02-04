@@ -20,7 +20,7 @@ sudo apt install apt-fast
 # C语言开发环境
 `sudo apt install build-essential -y`
 
-# gimp图像编辑工具（去plasma-discover中下载）
+# gimp图像编辑工具（去plasma-discover中下载）  
 
 # 安装完整的音乐解码库
 ```
