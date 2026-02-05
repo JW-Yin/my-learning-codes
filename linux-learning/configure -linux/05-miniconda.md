@@ -66,6 +66,12 @@ trusted-host = pypi.tuna.tsinghua.edu.cn
 | conda镜像源生效       | `conda config --show-sources` | 显示清华源地址，无海外源          |
 | pip镜像源生效         | `pip config list`             | 显示清华pip源地址                 |
 
+## 如果有需要
+
+```bash
+conda config --set auto_activate_base false # 永久关闭自动激活 base 环境
+```
+
 ## 核心基础用法（与Windows一致）
 ```bash
 conda --version                # 查看conda版本
