@@ -1,3 +1,7 @@
+# C语言开发环境
+`sudo apt install build-essential -y`
+
+
 # Ubuntu 22.04 Miniconda 安装配置
 ## 适用场景
 - 系统：Ubuntu 22.04（x86_64架构；ARM架构需替换下载链接后缀为 `Linux-aarch64`）

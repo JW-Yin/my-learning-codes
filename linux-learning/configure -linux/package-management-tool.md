@@ -1,3 +1,11 @@
+# 安装依赖自动管理工具 aptitude
+`sudo apt-get install aptitude`
+- 以后再安装任何东西都可以使用`sudo aptitude install <package_name>`，等价替换`sudo apt install <package_name>`
+
+# 安装图形化包管理工具
+1. `sudo apt upgrade -y`
+2. `sudo apt install plasma-discover -y`
+
 # Ubuntu 主流软件安装方式梳理
 
 ## 一、系统原生包管理（apt 系列）
