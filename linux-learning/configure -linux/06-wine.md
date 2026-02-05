@@ -30,6 +30,7 @@ winetricks --version
 winetricks vcrun2019-sp1
 # 2. 安装wine-gecko（HTML渲染组件，适配微信/QQ/带网页界面的程序）
 winetricks wine-gecko
+winetricks mono
 # 3. 注册OLE核心组件（解决截屏/组件未注册报错，执行后显示「成功」即可）
 cd ~/.wine/drive_c/windows/system32/ && wine regsvr32 ole32.dll && wine regsvr32 oleaut32.dll
 ```
@@ -44,3 +45,10 @@ cd ~/.wine/drive_c/windows/system32/ && wine regsvr32 ole32.dll && wine regsvr32
 wine ~/桌面/auto_script/PixPin_1.8.2.0/PixPin/PixPin.exe
 ```
 
+
+
+教程`https://www.sysgeek.cn/ubuntu-wine/`
+https://www.dongaigc.com/p/zq1997/deepin-wine
+https://deepin-wine.i-m.dev/
+
+sudo apt install mono-complete
