@@ -6,6 +6,22 @@
 1. `sudo apt upgrade -y`
 2. `sudo apt install plasma-discover -y`
 
+# 安装flatpak 
+sudo apt update
+sudo apt install flatpak -y
+# （可选）安装 GNOME 软件中心插件，支持图形化管理 Flatpak 应用
+sudo apt install gnome-software-plugin-flatpak -y
+
+# 添加 Flathub 仓库（国内镜像加速）
+
+# 第一步：添加官方仓库配置（后续可修改为镜像）
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+# 第二步：修改为中科大镜像
+# flatpak remote-modify flathub --url=https://mirrors.ustc.edu.cn/flathub/
+
+
+
 # Ubuntu 主流软件安装方式梳理
 
 ## 一、系统原生包管理（apt 系列）
