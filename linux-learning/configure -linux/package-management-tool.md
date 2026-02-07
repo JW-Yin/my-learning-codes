@@ -2,9 +2,6 @@
 `sudo apt-get install aptitude`
 - 以后再安装任何东西都可以使用`sudo aptitude install <package_name>`，等价替换`sudo apt install <package_name>`
 
-# 安装图形化包管理工具
-1. `sudo apt upgrade -y`
-2. `sudo apt install plasma-discover -y`
 
 # 安装flatpak 
 sudo apt update
