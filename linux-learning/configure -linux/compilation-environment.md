@@ -1,3 +1,5 @@
+# java开发环境
+
 # C语言开发环境
 `sudo apt install build-essential -y`
 
