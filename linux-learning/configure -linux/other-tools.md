@@ -4,3 +4,13 @@
 ```
 sudo apt update && sudo apt install gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-libav ffmpeg
 ```
+
+# Mark Text（markdown工具）
+```
+sudo apt update && sudo apt install -y libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils libatspi2.0-0 libdrm2 libgbm1 libasound2
+
+去官网找deb包：https://github.com/marktext/marktext/releases
+
+sudo apt install -y ./marktext-amd64.deb
+
+```
