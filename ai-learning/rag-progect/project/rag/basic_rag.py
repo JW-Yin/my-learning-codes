@@ -1,28 +1,63 @@
 # rag/basic_rag.py
 import os
-from langchain_community.document_loaders import TextLoader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
+import math
+from collections import Counter
 
-from model.embedding import get_embedding_model
-from model.llm import get_llm_model
-from config.config import RAG_CONFIG
+# Minimal dependency-free RAG implementation.
+# It loads documents, splits them into chunks, and does a simple
+# TF (term-frequency) based cosine-similarity retrieval. This avoids
+# external API keys and langchain dependencies so the demo can run locally.
 
-# 全局变量：存储向量库（避免每次查询都重新加载）
-vector_db = None
+# Global storage
+DOC_CHUNKS = []  # list of strings (chunks)
 
-def init_basic_rag(doc_path: str = "data/docs/test_docs.txt"):
+def _tokenize(text: str):
+    # very small tokenizer: split on whitespace and punctuation
+    if not text:
+        return []
+    tokens = []
+    cur = []
+    for ch in text:
+        # If Chinese character, emit it as its own token
+        if '\u4e00' <= ch <= '\u9fff':
+            if cur:
+                tokens.append(''.join(cur).lower())
+                cur = []
+            tokens.append(ch)
+        elif ch.isalnum():
+            cur.append(ch)
+        else:
+            if cur:
+                tokens.append(''.join(cur).lower())
+                cur = []
+    if cur:
+        tokens.append(''.join(cur).lower())
+    return tokens
+
+def _tf_vector(tokens):
+    return Counter(tokens)
+
+def _cosine_sim(c1: Counter, c2: Counter):
+    # compute cosine similarity between two term-frequency counters
+    if not c1 or not c2:
+        return 0.0
+    # dot product
+    dot = 0
+    for k, v in c1.items():
+        dot += v * c2.get(k, 0)
+    norm1 = math.sqrt(sum(v * v for v in c1.values()))
+    norm2 = math.sqrt(sum(v * v for v in c2.values()))
+    if norm1 == 0 or norm2 == 0:
+        return 0.0
+    return dot / (norm1 * norm2)
+
+def init_basic_rag(doc_path: str = "data/docs/test_docs.txt", chunk_size: int = 500):
     """
-    初始化基础RAG：加载文档→分割→向量化→构建向量库
-    :param doc_path: 测试文档路径（需提前创建）
+    Initialize minimal RAG: ensure doc exists, split into chunks and store them.
     """
-    global vector_db
-    # 1. 检查测试文档是否存在，不存在则创建示例文档
+    global DOC_CHUNKS
     if not os.path.exists(doc_path):
         os.makedirs(os.path.dirname(doc_path), exist_ok=True)
-        # 写入示例保险文档内容（极简测试用）
         with open(doc_path, "w", encoding="utf-8") as f:
             f.write("""
 保险基础知识：
@@ -32,60 +67,49 @@ def init_basic_rag(doc_path: str = "data/docs/test_docs.txt"):
             """)
         print(f"⚠️ 未找到测试文档，已自动创建：{doc_path}")
 
-    # 2. 加载文档
-    loader = TextLoader(doc_path, encoding="utf-8")
-    documents = loader.load()
+    with open(doc_path, "r", encoding="utf-8") as f:
+        text = f.read()
 
-    # 3. 文本分割
-    text_splitter = CharacterTextSplitter(
-        chunk_size=RAG_CONFIG["chunk_size"],
-        chunk_overlap=RAG_CONFIG["chunk_overlap"],
-        separator="\n"
-    )
-    splits = text_splitter.split_documents(documents)
+    # simple chunking by fixed character size
+    DOC_CHUNKS = []
+    start = 0
+    while start < len(text):
+        chunk = text[start:start + chunk_size].strip()
+        if chunk:
+            DOC_CHUNKS.append(chunk)
+        start += chunk_size
 
-    # 4. 构建向量库（FAISS，本地轻量存储）
-    embedding = get_embedding_model()
-    vector_db = FAISS.from_documents(splits, embedding)
-    print(f"✅ 基础RAG初始化完成！加载文档数：{len(documents)}，分割后片段数：{len(splits)}")
+    print(f"✅ 基础RAG初始化完成！分割后片段数：{len(DOC_CHUNKS)}")
 
-def basic_rag_query(question: str) -> str:
+def basic_rag_query(question: str, top_k: int = 3):
     """
-    极简RAG查询：检索+生成回答
-    :param question: 用户问题
-    :return: LLM生成的回答
+    Perform a simple retrieval based on term-overlap cosine similarity
+    and return the top_k chunks concatenated as the "answer".
     """
-    global vector_db
-    # 检查向量库是否初始化
-    if vector_db is None:
+    global DOC_CHUNKS
+    if not DOC_CHUNKS:
         init_basic_rag()
 
-    # 1. 构建检索链
-    llm = get_llm_model()
-    # 极简提示词：只告诉LLM用检索到的信息回答问题
-    prompt = PromptTemplate(
-        template="""请根据以下参考信息回答用户问题，只使用参考信息中的内容，不要编造：
-参考信息：
-{context}
+    q_tokens = _tokenize(question)
+    q_vec = _tf_vector(q_tokens)
 
-用户问题：{question}
-        """,
-        input_variables=["context", "question"]
-    )
+    scored = []
+    for chunk in DOC_CHUNKS:
+        tokens = _tokenize(chunk)
+        vec = _tf_vector(tokens)
+        sim = _cosine_sim(q_vec, vec)
+        scored.append((sim, chunk))
 
-    # 2. 构建RAG链
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",  # 极简模式：把所有检索结果拼接给LLM
-        retriever=vector_db.as_retriever(search_kwargs={"k": RAG_CONFIG["top_k"]}),
-        chain_type_kwargs={"prompt": prompt},
-        return_source_documents=True  # 返回检索到的源文档（方便调试）
-    )
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top = [c for s, c in scored[:top_k] if s > 0]
 
-    # 3. 执行查询
-    result = qa_chain({"query": question})
-    # 4. 返回回答（简化版，只返回核心内容）
+    # Simple answer: concatenate top chunks; if none matched, return a fallback
+    if top:
+        answer = "\n".join(top)
+    else:
+        answer = "抱歉，未找到相关信息。"
+
     return {
-        "answer": result["result"],
-        "source_documents": [doc.page_content for doc in result["source_documents"]]
+        "answer": answer,
+        "source_documents": top
     }

@@ -1,6 +1,18 @@
 # api/main.py
+import os
+import sys
 import uvicorn
 from fastapi import FastAPI, HTTPException
+
+# 关键：将项目根目录加入Python搜索路径
+# 获取当前文件（main.py）的目录
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# 项目根目录（api/ 的上层目录）
+project_root = os.path.dirname(current_dir)
+# 加入sys.path
+sys.path.append(project_root)
+
+# 现在可以正常导入rag模块了
 from rag.basic_rag import init_basic_rag, basic_rag_query
 
 # 初始化FastAPI应用
