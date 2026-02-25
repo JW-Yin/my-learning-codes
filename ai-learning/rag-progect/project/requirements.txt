@@ -8,8 +8,8 @@ pymongo==4.6.1
 pymilvus==2.3.5
 
 # LangChain 全家桶
-langchain==0.1.5
-langchain-community==0.0.17
+langchain
+langchain-community
 langchain-text-splitters==0.0.1
 
 # 阿里云 SDK
