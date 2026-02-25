@@ -1,48 +1,62 @@
-# api/main.py
-import os
-import sys
-import uvicorn
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from config.config import settings
+from rag.basic_rag import basic_rag
+from db.mongo_db import mongo_manager
+import uuid
 
-# 关键：将项目根目录加入Python搜索路径
-# 获取当前文件（main.py）的目录
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# 项目根目录（api/ 的上层目录）
-project_root = os.path.dirname(current_dir)
-# 加入sys.path
-sys.path.append(project_root)
+app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 
-# 现在可以正常导入rag模块了
-from rag.basic_rag import init_basic_rag, basic_rag_query
+# --- 数据模型 ---
+class AddDocRequest(BaseModel):
+    title: str
+    content: str
 
-# 初始化FastAPI应用
-app = FastAPI(title="极简RAG Demo", version="0.1")
+class QueryRequest(BaseModel):
+    question: str
 
-# 启动时初始化RAG（加载文档+构建向量库）
-@app.on_event("startup")
-def startup_event():
-    """服务启动时初始化RAG"""
-    init_basic_rag()
+# --- 接口 ---
 
-# 暴露RAG查询接口
-@app.get("/rag/query")
-def rag_query(question: str):
+@app.get("/")
+def root():
+    return {"message": "RAG System Online", "docs": "/docs"}
+
+@app.post("/admin/add_knowledge")
+def add_knowledge(req: AddDocRequest):
     """
-    极简RAG查询接口
-    :param question: 用户问题（如：重疾险和医疗险有什么区别？）
+    1. 先把元数据存入 MongoDB
+    2. 再把内容切分向量化存入 Milvus (通过 LangChain)
     """
-    if not question:
-        raise HTTPException(status_code=400, detail="问题不能为空！")
     try:
-        result = basic_rag_query(question)
-        return {
-            "code": 200,
-            "message": "查询成功",
-            "data": result
-        }
+        # 生成唯一 ID
+        doc_id = str(uuid.uuid4())
+        
+        # 1. 存 MongoDB (留底)
+        mongo_manager.add_doc_metadata(doc_id, req.title, req.content)
+        
+        # 2. 存 Milvus (用于检索)
+        # 这里我们简单点，整段存进去；实际项目可以用 CharacterTextSplitter 切分
+        basic_rag.add_documents(
+            texts=[req.content],
+            metadatas=[{"doc_id": doc_id, "title": req.title}]
+        )
+        
+        return {"status": "success", "doc_id": doc_id, "title": req.title}
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"查询失败：{str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-# 本地运行入口
+@app.post("/chat")
+def chat(req: QueryRequest):
+    """
+    基础 RAG 问答
+    """
+    try:
+        result = basic_rag.query(req.question)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
+    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
