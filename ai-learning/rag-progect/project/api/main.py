@@ -35,7 +35,6 @@ def add_knowledge(req: AddDocRequest):
         mongo_manager.add_doc_metadata(doc_id, req.title, req.content)
         
         # 2. 存 Milvus (用于检索)
-        # 这里我们简单点，整段存进去；实际项目可以用 CharacterTextSplitter 切分
         basic_rag.add_documents(
             texts=[req.content],
             metadatas=[{"doc_id": doc_id, "title": req.title}]
