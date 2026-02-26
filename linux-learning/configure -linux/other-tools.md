@@ -19,5 +19,11 @@ sudo apt install -y ./marktext-amd64.deb
 ```bash
 sudo apt update && sudo apt install vlc -y
 vlc --version
+```
 
+## 更换真正的firefox
+更换前先去官网下载最新版的firefox
+```bash
+sudo snap remove --purge firefox
+sudo rm -rf /var/snap/firefox
 ```
