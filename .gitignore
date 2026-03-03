@@ -1,4 +1,5 @@
 # Obsidian 缓存与临时文件
+.obsidian
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
 .obsidian/cache
