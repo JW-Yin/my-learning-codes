@@ -27,3 +27,7 @@ vlc --version
 sudo snap remove --purge firefox
 sudo rm -rf /var/snap/firefox
 ```
+
+## 去官网下载Obsidian的Deb包
+
+https://obsidian.md/download
