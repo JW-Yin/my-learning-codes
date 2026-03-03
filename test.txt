@@ -3,3 +3,4 @@ hello github
 hello vscode
 hello ubuntu
 hello git
+hello Obsidian
