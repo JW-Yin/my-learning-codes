@@ -1,7 +1,9 @@
 # 👋 你好，我是殷佳伟  
-> 计算机科学与技术专业 | 算法竞赛获奖者 | Java Web开发 | Web安全攻防实践者 | Linux运维  
-> 核心目标：深耕**Web安全、Web后端开发、云原生安全**，立志成为「懂开发的安全专家」  
-> 邮箱：JW-Yin@foxmail.com | 电话：198-3328-8907  
+> 计算机科学与技术专业 | 算法竞赛国奖 | Java Web全栈开发 | Web安全入门实践者 | Linux运维
+> 
+> 核心目标：深耕**Web安全、Web后端开发、云原生安全**，立志成为「懂开发的安全专家」
+> 
+> 邮箱：JW-Yin@foxmail.com | 电话：198-3328-8907（微信同号）
 ---
 
 ## 🏆 核心成果与荣誉
@@ -22,7 +24,7 @@
   - 协助搭建基于Ollama+AnythingLLM的私有化文档检索系统，实现本地知识库智能问答
 
 ### 核心能力认证
-- CET-4（436分）、工业互联网平台开发工程师（初级）、全国计算机等级考试二级、普通话二甲
+- CET-4、工业互联网平台开发工程师（初级）、全国计算机等级考试二级、普通话二甲
 - 算法能力：Codeforces 1700分水平，熟练使用C/C++实现算法设计与程序优化
 - 安全实战：已搭建DVWA、sqli-labs、upload-labs本地靶场，可完成SQL注入、XSS、文件上传等漏洞的原理演示与利用
 
@@ -30,22 +32,26 @@
 
 ## 🚀 核心项目作品
 ### 1. 乡村振兴助农电商系统（毕业设计）
-**技术栈**：SpringBoot、MyBatis、MySQL/TiDB、Thymeleaf、FastAPI、RAG、Docker
+**技术栈**：Java、SpringBoot、MyBatis、MySQL/TiDB、Thymeleaf、FastAPI、RAG、Docker  
+
 **核心亮点**：
-- 全栈实现商品展示、订单管理、用户权限等核心模块，后端基于SpringBoot构建RESTful API，前端通过Thymeleaf+AJAX实现动态渲染
+- 独立开发全栈，实现商品展示、订单管理、用户权限等核心模块，后端基于SpringBoot构建RESTful API，前端通过Thymeleaf+AJAX实现动态渲染
 - 完成MySQL到TiDB分布式集群的迁移优化，经JMeter压测验证，系统TPS提升30%，产出完整的性能对比测试报告
 - 基于RAG架构封装AI智能客服，通过FastAPI搭建独立服务，与SpringBoot后端打通，实现商品咨询、助农政策智能问答
 - 基于Docker Compose实现SpringBoot、TiDB、FastAPI等多服务一键容器化部署与环境隔离，大幅降低部署成本  
-**仓库导航**：[点击跳转](./agriculture-ecommerce)
+
+**仓库导航**：[老师您好，我正在加紧完善我的Github，如有需要请联系我，可邮件发送源码给您查看](./agriculture-ecommerce)
 
 ### 2. 自动化Web漏洞扫描器
 **技术栈**：Python、requests、BeautifulSoup、threading、argparse、logging
+
 **核心亮点**：
-- 自主开发的自动化渗透测试工具，支持SQL注入、XSS跨站脚本、文件上传等OWASP Top10常见漏洞的自动化检测
+- 自主开发的自动化渗透测试工具，支持SQL注入、XSS跨站脚本、文件上传等常见漏洞的自动化检测
 - 基于threading+任务队列实现多线程并发扫描，可灵活控制并发速率，兼顾扫描效率与目标服务器稳定性
 - 支持自定义命令行参数配置，自动生成结构化JSON格式检测报告，完整记录漏洞触发payload、风险等级与修复建议
 - 已完成DVWA靶场low/medium级别全漏洞通关验证，可稳定输出可复现的漏洞检测结果  
-**仓库导航**：[点击跳转](./web-vulnerability-scanner)
+
+**仓库导航**：[老师您好，我正在加紧完善我的Github，如有需要请联系我，可邮件发送源码给您查看](./web-vulnerability-scanner)
 
 ---
 
@@ -53,10 +59,10 @@
 | 技术领域 | 核心技能点 |
 |----------|------------|
 | **编程语言** | C/C++（CF 1700算法水平）、Java、Python、Shell |
-| **后端开发** | Spring Boot、MyBatis、Thymeleaf、FastAPI、RESTful API设计、AJAX |
-| **数据库与存储** | MySQL、TiDB、SQLite、数据库主从架构搭建、SQL性能优化 |
-| **Web安全攻防** | OWASP Top10漏洞原理与利用、SQL注入/XSS/文件上传漏洞检测、Burp Suite、中国蚁剑、Godzilla、自动化渗透脚本开发 |
-| **系统运维与中间件** | Linux服务器运维、SSH安全加固、Docker容器化部署、Docker Compose、Kafka、Zookeeper、Shell自动化脚本 |
+| **后端开发** | Java Web（Spring Boot、MyBatis、Thymeleaf、AJAX）、Python Web（FastAPI）、RESTful API设计 |
+| **数据库** | MySQL、TiDB、数据库主从架构搭建、SQL性能优化 |
+| **Web安全（入门与实践）** | SQL注入/XSS/文件上传漏洞原理与靶场演示、Burp Suite代理配置与使用、中国蚁剑/Godzilla工具使用、自动化渗透脚本开发（Python） |
+| **系统运维与中间件** | Linux服务器运维、SSH安全加固、Docker容器化部署、Docker Compose、Kafka/Zookeeper基础部署、Shell自动化脚本 |
 | **工具与工程能力** | Git、JMeter压测、PyInstaller、日志系统设计、多线程编程 |
 
 ---
@@ -74,9 +80,11 @@
 ---
 
 ## 🎯 长期成长规划
+
 核心理念：**先成为合格的开发者，再成为懂开发的安全专家，最终成长为云原生环境下的安全专家**，所有技术学习均以Web安全为主线，开发与云原生能力为安全赋能，拒绝无意义的泛学。
 
 ### 四阶段成长路径
+
 1.  **筑基期**：深耕Linux系统安全与网络基础，夯实底层原理，完成Web安全核心体系入门
 2.  **开发能力构建期**：深耕Java/Python Web后端开发，掌握数据库安全与前端基础，从开发视角理解漏洞成因与防御方案
 3.  **安全核心攻坚期**：深耕Web安全核心攻防技术，开发自动化安全工具，完成Linux系统安全进阶与Docker容器安全入门
@@ -93,4 +101,5 @@
 ## 📫 联系我
 - 邮箱：JW-Yin@foxmail.com
 - 电话：198-3328-8907（微信同号）
----
+
+> 🚧 本仓库正在持续完善中，部分项目源码与学习笔记将陆续上传，如有需要可通过邮件联系我获取～
