@@ -77,6 +77,8 @@
 - **[web-security-learning](./web-security-learning)**：Web安全原理学习、靶场通关记录、漏洞复现笔记、POC/EXP开发实战
 - **[java-web-learning](./java-web-learning)**：Java Web全栈开发学习、Spring Boot/MyBatis框架实战、项目开发笔记与源码
 
+> 🚧 本仓库正在持续完善中，部分项目源码与学习笔记将陆续上传，如有需要可通过邮件联系我获取～
+
 ---
 
 ## 🎯 长期成长规划
