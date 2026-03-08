@@ -23,6 +23,7 @@ def get_page_content(url):
         response.raise_for_status() # 如果请求失败（如404, 500），抛出异常
         # 自动检测并设置编码，防止中文乱码
         response.encoding = response.apparent_encoding
+        # print(response.text)  # 输出网页内容，供调试使用
         return response.text
     except requests.RequestException as e:
         print(f"获取网页出错: {e}")
