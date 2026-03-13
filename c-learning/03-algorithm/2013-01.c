@@ -2,15 +2,25 @@
 编程求一元二次方程ax²+bx+c=0的根x1和x2
 */
 
-#include<stdio.h>
-#include<math.h>
+#include <stdio.h>
+#include <math.h>
 
-int main(){
-    double a,b,c;
-    scanf("%lf %lf %lf",&a,&b,&c);
-
-    double fenzi1=b*(-1)+sqrt(b*b-4*a*c),fenzi2=b*(-1)-sqrt(b*b-4*a*c),fenmu=2*a;
-    printf("x1=%lf\nx2=%lf",fenzi1/fenmu,fenzi2/fenmu);
+int main() {
+    double a,b,c; scanf("%lf %lf %lf",&a,&b,&c);
+    if(a == 0){
+        printf("非法方程");
+        return 0;
+    } 
+    double derta=b*b-4*a*c;
+    if(derta < 0) printf("无解");
+    else{
+        double x1=(b*(-1) + sqrt(derta))/(2*a);
+        double x2=(b*(-1) - sqrt(derta))/(2*a);
+        if(fabs(derta) < 1e-12) printf("有唯一解x1=x2=%lf",x1);
+        else{
+            printf("x1=%lf,x2=%lf",x1,x2);
+        }
+    }
     return 0;
 }
 

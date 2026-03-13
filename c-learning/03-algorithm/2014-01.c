@@ -3,24 +3,26 @@
 例：输入“5ab3c4d8h2”，输出整数53482和字符串“abcdh”。
 */
 
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
 
 int main() {
-    char str[20];
-    long num = 0;
-    
-    scanf("%s", str);
-    int len=strlen(str);
-    for(int i=0,j=0;i <= len;++i){
-        if(str[i] >= '0' && str[i] <= '9'){
-            num=num*10 + str[i]-'0';
-            j++;
-        }else str[i-j]=str[i];
+    char str[20]="\0",ch;
+    int str_len=0;
+    while((ch=getchar()) != '\n'){
+        str[str_len++]=ch;
+        str[str_len]='\0';
     }
-    
-    printf("%ld\n%s\n", num, str);
-    
+    long long int ans=0,offset=0;
+    for(int i=0;i<=str_len;++i){
+        if(str[i] >= '0' && str[i] <= '9'){
+            ans*=10,ans+=str[i]-'0';
+            offset++;
+        }else{
+            str[i-offset]=str[i];
+        }
+    }
+    str_len-=offset;
+    printf("%lld,%s",ans,str);
     return 0;
 }
 

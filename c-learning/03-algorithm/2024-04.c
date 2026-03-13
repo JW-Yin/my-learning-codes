@@ -7,20 +7,19 @@ A号兔子窟派出与B号当前兔子数相等的兔子，跑去B号兔子窟�
 要求：用C语言程序设计，求出三个兔子窟一开始各自的兔子数量。
 */
 
-# include<stdio.h>
+#include <stdio.h>
 
-// 直接逆推
-int main(){
-    int a=16,b=16,c=16;
-    a/=2;
-    c+=a;
+int main() {
+    int a,b,c;
+    a=b=c=16;
 
-    c/=2;
-    b+=c;
-
-    b/=2;
-    a+=b;
-    printf("the number of Rabbits A: %d,\nthe number of Rabbits B: %d,\nthe number of Rabbits C: %d",a,b,c);
+    // 先让c去a的兔子回去
+    c+=a/2,a/=2;
+    // 再让b去c的兔子回去
+    b+=c/2,c/=2;
+    // 再让a去b的兔子回去
+    a+=b/2,b/=2;
+    printf("a=%d,b=%d,c=%d",a,b,c);
     return 0;
 }
 

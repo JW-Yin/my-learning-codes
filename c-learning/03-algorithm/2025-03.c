@@ -5,36 +5,31 @@
 要求在主函数中输入字符串、K、N，调用函数处理后输出结果。
 */
 
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
 
-void f1(char *str,int len, int n){
-    for(int j=0;j<n;++j){
-        str[len++]='*';
-    }
-    str[len]='\0';
-}
-void f2(char *str,int len, int K,int n){
-    for(int j=len;j>=K;j--){
-        str[j+n] = str[j];
-    }
-    for(int i=K,j=0;j<n;++j){
-        str[i++]='*';
-    }
-}
-
-int main(){
-    int K,N;
-    char str[100];
-    scanf("%s %d %d",str,&K,&N);
-
+void fun(char *str,int K,int N){
     int len=strlen(str);
-    if(len < K){
-        f1(str,len,N);
+    if(K <= len){
+        // 先把K位置及其右面所有往后移动N个位置
+        for(int i=0; len-i >= K-1 ;++i)
+            str[len+N-i]=str[len-i];
+        // 从K位置开始的N个位置全填充' '
+        for(int i=0;i<N;++i)
+            str[i+K-1]=' ';
     }else{
-        f2(str,len,K-1,N);
+        for(int i=0;i<N;++i){
+            str[len++]='*';
+            str[len]='\0';
+        }
     }
-    printf("%s",str);
+    printf("%s\n",str);
+}
+int main() {
+    char str[100];
+    int K,N;
+    scanf("%s %d %d",str,&K,&N);
+    fun(str,K,N);
     return 0;
 }
 
