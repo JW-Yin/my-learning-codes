@@ -31,3 +31,9 @@ sudo rm -rf /var/snap/firefox
 ## 去官网下载Obsidian的Deb包
 
 https://obsidian.md/download
+
+# tree
+
+```bash
+sudo apt update && sudo apt install tree -y
+```
