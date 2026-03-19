@@ -128,11 +128,8 @@ sudo vim /etc/docker/daemon.json
 ```json
 {
   "registry-mirrors": [
-    "https://docker.m.daocloud.io",
-    "https://hub.rat.dev",
-    "https://docker.1panel.live",
-    "https://registry-1.docker.m.daocloud.io",
-    "https://fhayyejh.mirror.aliyuncs.com"
+          "https://jw-yin",
+          "https://docker.m.daocloud.io"
   ]
 }
 ```
