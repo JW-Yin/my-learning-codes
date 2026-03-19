@@ -128,6 +128,8 @@ def main():
     
     # 循环监控每个 URL
     for url in TARGET_URLS:
+        # 请求前随机小延迟（模拟真人打开浏览器的等待）
+        time.sleep(random.uniform(1, 3))
         monitor_single_url(url)
     
     print("\n" + "="*60)
