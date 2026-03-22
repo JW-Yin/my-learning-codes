@@ -35,10 +35,10 @@
 **技术栈**：Java、SpringBoot、MyBatis、MySQL/TiDB、Thymeleaf、FastAPI、RAG、Docker  
 
 **核心亮点**：
-- 独立开发全栈，实现商品展示、订单管理、用户权限等核心模块，后端基于SpringBoot构建RESTful API，前端通过Thymeleaf+AJAX实现动态渲染
-- 完成MySQL到TiDB分布式集群的迁移优化，经JMeter压测验证，系统TPS提升30%，产出完整的性能对比测试报告
-- 基于RAG架构封装AI智能客服，通过FastAPI搭建独立服务，与SpringBoot后端打通，实现商品咨询、助农政策智能问答
-- 基于Docker Compose实现多服务一键容器化部署与环境隔离，掌握容器化应用交付核心能力（云原生基础实践）  
+- 电商核心业务开发：基于 SpringBoot+MyBatis 搭建后端 RESTful API，采用 Thymeleaf+AJAX 实现前端页面动态渲染与交互，完成用户权限管理、商品分类 / 上架、购物车、订单管理、后台运营管控等核心模块，实现平台业务全闭环。
+- 数据库架构演进与性能优化：主导数据库架构全流程迭代，从MySQL 单机升级为MySQL 主从读写分离架构，最终落地TiDB 分布式集群，依次解决了单机场景单点故障、高并发查询性能瓶颈，以及主从架构同步延迟、水平扩展能力不足的问题；通过 JMeter 针对商品列表查询、订单提交等核心场景进行压测与 SQL 优化，最终实现系统 TPS 提升 30%，输出多架构性能对比测试报告。
+- RAG 智能客服微服务落地：基于 FastAPI 独立搭建 Python AI 微服务，设计实现 RAG 架构的智能客服系统；采用 Qwen-Embedding 模型构建向量索引，基于 pgvector 向量数据库实现商品信息、乡村振兴政策、平台 FAQ 知识库的高效召回，对接 Qwen-LLM 大模型实现多场景智能问答；SpringBoot 后端通过标准化 HTTP 接口对接 AI 微服务，实现业务系统与 AI 能力的完全解耦。
+- 容器化部署与环境统一：基于 Docker 完成 SpringBoot 后端、FastAPI 微服务、TiDB 集群、MySQL 等全服务的镜像构建，编写 Docker Compose 配置文件实现多服务一键启动、环境隔离与统一部署，大幅降低项目部署迁移成本，保障开发、测试、部署环境的一致性。 
 
 **仓库导航**：[如需查看源码，可邮件/微信联系我](./agriculture-ecommerce)
 
