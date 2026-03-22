@@ -10,6 +10,7 @@ from fake_useragent import UserAgent  # 需安装：pip install fake-useragent
 TARGET_URLS = [
     "https://www.guet.edu.cn/yjszs/2025/0905/c4230a141350/page.htm",  # 原有的桂电研招通知页
     "https://www.guet.edu.cn/yjszs/4230/list.htm",                        # 桂电首页
+    "https://www.guet.edu.cn/yjszs/2026/0322/c4230a149911/page.htm"
     # 继续添加更多 URL...
 ]
 # 用于存储所有页面哈希值的目录（每个页面对应一个独立文件）
@@ -115,11 +116,11 @@ def monitor_single_url(url):
         print(f"[{url}] 首次监控，已记录当前页面状态。")
     else:
         if current_hash != old_hash:
-            print(f"⚠️  [{url}] 有新更新！")
+            print(f"⚠️有新更新！")
             save_new_hash(url, current_hash)
             
         else:
-            print(f"[{url}] 暂无更新...")
+            print(f"暂无更新...")
 
 def main():
     print("="*60)
