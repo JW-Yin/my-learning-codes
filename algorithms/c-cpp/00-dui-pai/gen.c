@@ -8,16 +8,18 @@ int get_random_number(int a,int b){
 
 int main() {
     srand((unsigned int)time(NULL) ^ (unsigned int)getpid());
-
-    
+int i=5;
+    // while(i--){
     int str_len = get_random_number(5,10);
     char str[str_len+10];for(int i=0;i<str_len;++i)str[i]=get_random_number('A','Z');str[str_len]='\0';
-    int K=get_random_number(0,15),N=get_random_number(0,15);
+    int K=get_random_number(1,str_len);
+    int N=get_random_number(0,str_len+2);
 
     // FILE *fp=fopen("./input.txt","w");
     // fprintf(fp,"%s %d %d",str,K,N);
     // fclose(fp);
 
-    printf("%s %d %d",str,K,N);
+    printf("%s %d %d\n",str,K,N);
+// }
     return 0;
 }
