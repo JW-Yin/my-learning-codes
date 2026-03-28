@@ -9,8 +9,9 @@ from fake_useragent import UserAgent  # 需安装：pip install fake-useragent
 # 目标网页 URL 列表（把你要监控的所有页面放这里）
 TARGET_URLS = [
     "https://www.guet.edu.cn/yjszs/2025/0905/c4230a141350/page.htm",  # 原有的桂电研招通知页
-    "https://www.guet.edu.cn/yjszs/4230/list.htm",                        # 桂电首页
-    "https://www.guet.edu.cn/yjszs/2026/0322/c4230a149911/page.htm"
+    "https://www.guet.edu.cn/yjszs/4230/list.htm",                        # 通知首页
+    "https://www.guet.edu.cn/yjszs/2026/0322/c4230a149911/page.htm",
+    "https://www.guet.edu.cn/yjszs/2026/0323/c4245a150076/page.htm" # 拟录取名单
     # 继续添加更多 URL...
 ]
 # 用于存储所有页面哈希值的目录（每个页面对应一个独立文件）
