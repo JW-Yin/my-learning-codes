@@ -88,3 +88,21 @@ tail -f ~/cf.log
 ✅ 免费 HTTPS
 ✅ 后台常驻 + 开机自启
 ✅ 公网域名直接访问本地服务
+---
+```bash
+# 1. 安装
+wget -O cloudflared.rpm https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-x86_64.rpm
+sudo dnf install -y ./cloudflared.rpm
+
+# 2. 登录+创建隧道+绑定域名
+cloudflared tunnel login
+cloudflared tunnel create fedora-server
+cloudflared tunnel route dns fedora-server fedora.jw-yin.xyz
+
+# 3. 后台永久运行
+nohup cloudflared tunnel run --url http://localhost:8080 fedora-server > ~/cf.log 2>&1 &
+
+# 4. 开机自启
+echo "@reboot nohup cloudflared tunnel run --url http://localhost:8080 fedora-server > ~/cf.log 2>&1 &" | crontab -
+
+```
