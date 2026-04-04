@@ -1,4 +1,4 @@
-## 去官网下载Obsidian
+## Obsidian
 
-- https://obsidian.md/download
+- 去官网下载：`https://obsidian.md/download`
 - `flatpak install flathub md.obsidian.Obsidian`
