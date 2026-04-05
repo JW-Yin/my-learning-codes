@@ -1,7 +1,7 @@
 # 👋 你好，我是殷佳伟  
 > 计算机科学与技术专业 | 算法竞赛国奖 | Java Web全栈开发 | Linux运维 | 云原生安全/DevSecOps深耕者  
 > 
-> 核心目标：Java Web / Go / Linux / 容器(Docker/Podman) / K8s / 容器运行时安全 / Operator / 准入控制器 / Trivy/Falco 二次开发，立志成为「懂开发的云原生安全专家」
+> 核心目标：Java Web / Go / Linux / 容器（Docker/Podman） / K8s / 容器运行时安全 / Operator / 准入控制器 / Trivy/Falco 二次开发，立志成为「懂开发的云原生安全专家」
 > 
 > 邮箱：JW-Yin@foxmail.com | 电话：198-3328-8907（微信同号）
 ---
