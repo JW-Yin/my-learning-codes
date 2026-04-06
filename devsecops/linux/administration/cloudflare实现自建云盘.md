@@ -39,7 +39,7 @@ sudo chmod +x /usr/local/bin/filebrowser
 ## 【第三步】启动网盘（公网直接访问）
 ```bash
 # 1. 首次启动（看日志获取随机密码！）
-filebrowser -a 0.0.0.0 -p 8080 -r ~/公共 -d ~/.filebrowser.db
+nohup filebrowser -a 0.0.0.0 -p 8080 -r ~/公共 -d ~/.filebrowser.db > ~/fb.log 2>&1 &
 ```
 
 ### ✔ 关键看终端日志！会出现这一行：
