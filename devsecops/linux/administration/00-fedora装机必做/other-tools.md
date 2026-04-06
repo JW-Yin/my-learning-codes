@@ -7,8 +7,8 @@
 - 官网下载：`https://github.com/marktext/marktext/releases`
 
 
-
-
+## qBittorrent
+- `sudo dnf install qbittorrent -y`
 
 
 
