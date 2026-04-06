@@ -39,12 +39,12 @@ cloudflared tunnel route dns fedora-server fedora.你的域名
 ### 5. 【关键】后台永久运行（无冲突、无闪退）
 **不创建 config.yml、不用 root 服务**，纯普通用户运行：
 ```bash
-nohup cloudflared tunnel run --url http://localhost:8080 fedora-server > ~/cf.log 2>&1 &
+sudo nohup cloudflared tunnel run --protocol http2 --url http://127.0.0.1:8080 fedora-server > ~/cf.log 2>&1 &
 ```
 
 ### 6. 开机自启（重启自动跑）
 ```bash
-echo "@reboot nohup cloudflared tunnel run --url http://localhost:8080 fedora-server > ~/cf.log 2>&1 &" | crontab -
+echo "@reboot sudo nohup cloudflared tunnel run --protocol http2 --url http://127.0.0.1:8080 fedora-server > ~/cf.log 2>&1 &" | crontab -
 ```
 
 ---
@@ -89,6 +89,7 @@ tail -f ~/cf.log
 ✅ 后台常驻 + 开机自启
 ✅ 公网域名直接访问本地服务
 ---
+
 ```bash
 # 1. 安装
 wget -O cloudflared.rpm https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-x86_64.rpm
@@ -103,6 +104,7 @@ cloudflared tunnel route dns fedora-server fedora.jw-yin.xyz
 nohup cloudflared tunnel run --url http://localhost:8080 fedora-server > ~/cf.log 2>&1 &
 
 # 4. 开机自启
-echo "@reboot nohup cloudflared tunnel run --url http://localhost:8080 fedora-server > ~/cf.log 2>&1 &" | crontab -
+echo "@reboot sudo nohup cloudflared tunnel run --protocol http2 --url http://127.0.0.1:8080 fedora-server > ~/cf.log 2>&1 &" | crontab -
+
 
 ```

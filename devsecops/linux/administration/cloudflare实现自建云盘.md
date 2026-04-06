@@ -1,77 +1,70 @@
-我给你整理**终极极简速查版**！
-**任何新的 Linux/Fedora 设备**，直接按这个顺序复制粘贴，**1 分钟部署好公网网盘**，完全复刻你现在稳定的状态，零报错、无坑！
+# 🚀 Fedora 一键部署：Docker FileBrowser + Cloudflare 隧道（终极速查版）
+**适用于任何新 Fedora 系统，全程复制粘贴，100%复刻当前稳定状态**
 
----
-
-# 🚀 新设备 一键部署公网网盘（最终版）
-## 【第一步】安装并配置 Cloudflare 隧道（8080 端口）
+## 一、前置：彻底清理裸机残留（新系统可跳过）
 ```bash
-# 1. 安装 cloudflared
+# 杀死进程
+pkill -f filebrowser cloudflared
+# 删除文件
+sudo rm -f /usr/local/bin/filebrowser
+rm -f ~/.filebrowser.db ~/fb.log ~/cf.log
+rm -rf ~/.cloudflared
+# 卸载cloudflared
+sudo dnf remove -y cloudflared
+# 清空crontab
+crontab -r
+```
+
+## 二、Docker 部署 FileBrowser（核心，监听8080）
+```bash
+# 启动容器（端口8080，挂载~/公共，开机自启）
+docker run -d \
+  --name filebrowser \
+  --restart always \
+  -p 8080:80 \
+  -v ~/公共:/srv \
+  -v filebrowser_data:/database \
+  filebrowser/filebrowser:v2-s6
+
+# 查看初始密码
+docker logs filebrowser | grep "password"
+```
+> 账号：`admin` | 密码：日志中随机字符串
+
+## 三、安装 & 配置 Cloudflare 隧道（Fedora专属）
+```bash
+# 1. 安装cloudflared
 wget -O cloudflared.rpm https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-x86_64.rpm
 sudo dnf install -y ./cloudflared.rpm
 
-# 2. 登录 Cloudflare + 创建隧道 + 绑定域名
+# 2. 登录Cloudflare（浏览器授权，自动生成证书）
 cloudflared tunnel login
-cloudflared tunnel create fedora-server
-cloudflared tunnel route dns fedora-server fedora.jw-yin.xyz
 
-# 3. 后台启动隧道 + 开机自启
-nohup cloudflared tunnel run --url http://localhost:8080 fedora-server > ~/cf.log 2>&1 &
-echo "@reboot nohup cloudflared tunnel run --url http://localhost:8080 fedora-server > ~/cf.log 2>&1 &" | crontab -
+# 3. 前台启动隧道（输密码，看到Connection established即成功）
+sudo cloudflared tunnel run --url http://127.0.0.1:8080 fedora-server
+# 按Ctrl+Z暂停 → 丢后台运行
+bg
+disown
 ```
 
----
-
-## 【第二步】安装 FileBrowser 网盘（手动安装，永不失败）
+## 四、配置开机自启（永久生效）
 ```bash
-# 1. 下载安装包（国内可下载）
-cd ~/下载
-wget https://github.com/filebrowser/filebrowser/releases/latest/download/linux-amd64-filebrowser.tar.gz
-
-# 2. 解压+安装到系统
-tar -zxvf linux-amd64-filebrowser.tar.gz
-sudo mv filebrowser /usr/local/bin/
-sudo chmod +x /usr/local/bin/filebrowser
+# crontab添加sudo自启
+echo "@reboot sudo cloudflared tunnel run --url http://127.0.0.1:8080 fedora-server > ~/cf.log 2>&1" | crontab -
 ```
 
----
-
-## 【第三步】启动网盘（公网直接访问）
+## 五、验证 & 访问
 ```bash
-# 1. 首次启动（看日志获取随机密码！）
-nohup filebrowser -a 0.0.0.0 -p 8080 -r ~/公共 -d ~/.filebrowser.db > ~/fb.log 2>&1 &
-```
-
-### ✔ 关键看终端日志！会出现这一行：
-```
-User 'admin' initialized with randomly generated password: 【你的随机密码】
-```
-
----
-
-## 【第四步】登录后，后台永久运行
-```bash
-# 按 Ctrl+C 停止前台进程
-# 后台启动（关闭终端不退出）
-nohup filebrowser -a 0.0.0.0 -p 8080 -r ~/公共 -d ~/.filebrowser.db > ~/fb.log 2>&1 &
-```
-
----
-
-# 🌐 公网访问地址（所有设备通用）
-```
+# 查看隧道状态
+cat ~/cf.log
+# 公网访问（你的域名）
 https://fedora.jw-yin.xyz
 ```
 
 ---
 
-# 📌 3 个必记关键点（防踩坑）
-1. **用户名永远是 `admin`**
-2. **密码不是 admin！是首次启动时终端里的随机密码**
-3. **全程只占用 8080 端口，最稳定、无 1033、无冲突**
-
----
-
-# ✅ 完成！
-新设备现在 = **公网可访问的私人网盘**
-任何手机/电脑/平板，打开浏览器就能用！
+# ✅ 核心关键点（必记）
+1. FileBrowser 固定 **8080端口**（`-p 8080:80`），隧道直接对接
+2. cloudflared 必须 **sudo 运行**（解决凭证权限问题）
+3. 全程 Docker 化 FileBrowser，裸机仅留隧道，干净稳定
+4. 开机自启通过 crontab + sudo，重启自动运行
