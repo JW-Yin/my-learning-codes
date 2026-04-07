@@ -8,9 +8,10 @@ from fake_useragent import UserAgent  # 需安装：pip install fake-useragent
 # ====================== 配置部分（仅需修改这里） ======================
 # 目标网页 URL 列表（把你要监控的所有页面放这里）
 TARGET_URLS = [
-    "https://www.guet.edu.cn/yjszs/2025/0905/c4230a141350/page.htm",  # 原有的桂电研招通知页
-    "https://www.guet.edu.cn/yjszs/4230/list.htm",                        # 通知首页
-    "https://www.guet.edu.cn/yjszs/2026/0322/c4230a149911/page.htm",
+    "https://www.qidian.com/?source=m_jump"
+    # "https://www.guet.edu.cn/yjszs/2025/0905/c4230a141350/page.htm",  # 原有的桂电研招通知页
+    # "https://www.guet.edu.cn/yjszs/4230/list.htm",                        # 通知首页
+    # "https://www.guet.edu.cn/yjszs/2026/0322/c4230a149911/page.htm",
     # "https://www.guet.edu.cn/yjszs/2026/0323/c4245a150076/page.htm" # 拟录取名单
     # 继续添加更多 URL...
 ]
