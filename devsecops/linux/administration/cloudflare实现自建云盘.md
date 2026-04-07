@@ -9,10 +9,6 @@ pkill -f filebrowser cloudflared
 sudo rm -f /usr/local/bin/filebrowser
 rm -f ~/.filebrowser.db ~/fb.log ~/cf.log
 rm -rf ~/.cloudflared
-# 卸载cloudflared
-sudo dnf remove -y cloudflared
-# 清空crontab
-crontab -r
 ```
 
 ## 二、Docker 部署 FileBrowser（核心，监听8080）
