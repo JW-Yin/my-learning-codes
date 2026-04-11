@@ -1,15 +1,12 @@
 import requests
-from typing import Optional  # 新增这一行，兼容Python 3.9
+import argparse
+import hashlib
+from typing import Optional
 
-# ===================== 配置区域 =====================
-EMAIL = "926115191@qq.com"
-# 直接填入抓包抓到的那个加密后的密码字符串
-ENCRYPTED_PASSWORD = "b6bd42f5fb05e992cf30cf271f892875"
-
-# 地址配置
+# ===================== 地址配置 =====================
 FRONT_BASE_URL = "http://166.88.141.128:8089"
 API_BASE_URL = "http://120.241.238.148:8889"
-# ====================================================
+# ===================================================
 
 # 初始化会话
 session = requests.Session()
@@ -21,14 +18,27 @@ session.headers.update({
     "Content-Type": "application/json"
 })
 
-# 把这里的 str | None 改成 Optional[str]
-def login() -> Optional[str]:
+def encrypt_password(plain_password: str) -> str:
+    """
+    将明文密码进行 MD5 加密（与前端加密方式一致）
+    """
+    return hashlib.md5(plain_password.encode('utf-8')).hexdigest()
+
+def login(email: str, plain_password: str) -> Optional[str]:
+    """
+    登录获取Token
+    :param email: 邮箱账号
+    :param plain_password: 明文密码（脚本内部自动MD5加密）
+    :return: token字符串或None
+    """
     print("[步骤1] 正在登录...")
-    
-    # 直接使用加密后的密码
+
+    # 内部进行 MD5 加密
+    encrypted_password = encrypt_password(plain_password)
+
     login_payload = {
-        "email": EMAIL,
-        "password": ENCRYPTED_PASSWORD
+        "email": email,
+        "password": encrypted_password
     }
 
     login_params = {
@@ -60,10 +70,14 @@ def login() -> Optional[str]:
         print(f"[-] 登录失败: {login_result}")
         return None
 
-# 把这里的 bool | None 改成 Optional[bool]
 def checkin(token: str) -> Optional[bool]:
+    """
+    执行签到
+    :param token: 登录后获取的token
+    :return: 是否签到成功
+    """
     print("\n[步骤2] 正在签到...")
-    
+
     checkin_params = {
         "platform": "web",
         "cur_version": "0.0.0",
@@ -92,9 +106,14 @@ def checkin(token: str) -> Optional[bool]:
     return False
 
 if __name__ == "__main__":
-    # 调试模式
+    parser = argparse.ArgumentParser(description="自动签到脚本 - 输入邮箱和明文密码，自动MD5加密")
+    parser.add_argument("--email", "-e", required=True, help="登录邮箱账号")
+    parser.add_argument("--password", "-p", required=True, help="明文密码（如 Yy1306332003）")
+    args = parser.parse_args()
+
+    # 可选：开启调试代理
     # session.proxies = {"http": "http://127.0.0.1:8080", "https": "http://127.0.0.1:8080"}
-    
-    user_token = login()
+
+    user_token = login(args.email, args.password)
     if user_token:
         checkin(user_token)
