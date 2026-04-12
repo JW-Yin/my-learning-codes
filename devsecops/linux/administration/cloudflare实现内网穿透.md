@@ -90,7 +90,7 @@ sudo chown $USER:$USER ~/.cloudflared/你的隧道ID.json
 pkill -f cloudflared
 
 # 重启隧道（统一参数，无sudo）
-nohup cloudflared tunnel run --protocol http2 --url http://127.0.0.1:8080 fedora-server > ~/cf.log 2>&1 &
+nohup bash -c "cd ~ && cloudflared tunnel run --protocol http2 --url http://127.0.0.1:8080 fedora-server" > ~/cf.log 2>&1 &
 
 # 查看实时日志
 tail -f ~/cf.log
