@@ -5,12 +5,13 @@ from typing import Optional
 
 # ===================== 地址配置 =====================
 FRONT_BASE_URL = "http://166.88.141.128:8089"
-API_BASE_URL = "http://120.241.238.148:8889"
+API_BASE_URL = "https://api.viewturbo.com"
 # ===================================================
 
 # 初始化会话
 session = requests.Session()
 session.headers.update({
+    "Host": "api.viewturbo.com",
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
     "Origin": FRONT_BASE_URL,
     "Referer": f"{FRONT_BASE_URL}/",
@@ -31,7 +32,7 @@ def login(email: str, plain_password: str) -> Optional[str]:
     :param plain_password: 明文密码（脚本内部自动MD5加密）
     :return: token字符串或None
     """
-    print("[步骤1] 正在登录...")
+    print(f"[步骤1] 正在登录{email}...")
 
     # 内部进行 MD5 加密
     encrypted_password = encrypt_password(plain_password)
