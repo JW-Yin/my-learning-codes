@@ -10,6 +10,9 @@
 ## qBittorrent
 - `sudo dnf install qbittorrent -y`
 
+## vlc
+`sudo dnf install vlc`
+
 
 
 
