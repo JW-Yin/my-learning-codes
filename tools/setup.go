@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-// 定义要创建的目录和空文件
+// 定义要创建的目录
 var dirs = []string{
 	"frontend/css",
 	"frontend/js",
@@ -30,23 +30,43 @@ var dirs = []string{
 	"scripts",
 }
 
+// 定义要创建的文件及其内容（全部使用反引号原始字符串，无需转义）
 var files = map[string]string{
-	"frontend/Dockerfile":          `# 前端 Dockerfile 占位，请根据实际构建步骤填写`,
-	"frontend/nginx.conf":          `# Nginx 配置占位，用于 SPA 回退和 API 代理`,
-	"frontend/index.html":          `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>App</title></head><body></body></html>`,
-	"backend/Dockerfile":           `# 后端 Dockerfile 占位，多阶段构建 Go 服务`,
-	"backend/entrypoint.sh":        `#!/bin/sh\necho "Entrypoint placeholder"`,
-	"backend/go.mod":               `module github.com/yourusername/project\n\ngo 1.22`,
-	"backend/cmd/server/main.go":   `package main\n\nfunc main() {\n\t// 启动 Gin 服务\n}`,
-	"backend/configs/config.yaml":  `server:\n  port: 8080\ndatabase:\n  host: localhost\n  port: 5432\n  user: postgres\n  password: secret\n  dbname: myapp\n  sslmode: disable`,
+	"frontend/Dockerfile": `# 前端 Dockerfile 占位，请根据实际构建步骤填写`,
+	"frontend/nginx.conf": `# Nginx 配置占位，用于 SPA 回退和 API 代理`,
+	"frontend/index.html": `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>App</title>
+</head>
+<body>
+</body>
+</html>`,
+	"backend/Dockerfile":    `# 后端 Dockerfile 占位，多阶段构建 Go 服务`,
+	"backend/entrypoint.sh": `#!/bin/sh\necho "Entrypoint placeholder"`,
+	"backend/cmd/server/main.go": `package main
+
+func main() {
+	// 启动 Gin 服务
+}`,
+	"backend/configs/config.yaml": `server:
+  port: 8080
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: secret
+  dbname: myapp
+  sslmode: disable`,
 	"backend/migrations/000001_init.up.sql":   `-- 初始表结构（基调）\nCREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name TEXT);`,
 	"backend/migrations/000001_init.down.sql": `-- 回滚初始表结构\nDROP TABLE IF EXISTS users;`,
-	".gitignore":                              `/.idea\n/.vscode\n*.log\n.env\nfrontend/dist\nbackend/static`,
-	".dockerignore":                           `**/.git\n**/node_modules\n*.log\n.env`,
-	"docker-compose.yml":                      `# 三容器编排文件占位`,
+	".gitignore":         `/.idea\n/.vscode\n*.log\n.env\nfrontend/dist\nbackend/static`,
+	".dockerignore":      `**/.git\n**/node_modules\n*.log\n.env`,
+	"docker-compose.yml": `# 三容器编排文件占位`,
 }
 
-// README 内容模板
+// README 内容模板（原始字符串，直接包含代码块）
 const readmeContent = `# 项目结构说明
 
 ## 技术栈
@@ -56,7 +76,7 @@ const readmeContent = `# 项目结构说明
 
 ## 目录结构
 
-` + "`" + `` + "`" + `` + "`" + `
+` + "```" + `
 project/
 ├── .gitignore
 ├── .dockerignore
@@ -98,7 +118,7 @@ project/
 │       └── 000001_init.down.sql
 │
 └── scripts/                      # 开发辅助脚本
-` + "`" + `` + "`" + `` + "`" + `
+` + "```" + `
 
 ## 分层职责
 
@@ -123,10 +143,10 @@ project/
 - 原理类似于 Git，保证表结构变更可追溯、可复现、可回滚。
 
 ## 启动方式
-` + "`" + `` + "`" + `` + "`" + `bash
+` + "```bash" + `
 # 在项目根目录执行
 docker-compose up -d
-` + "`" + `` + "`" + `` + "`" + `
+` + "```" + `
 
 访问 http://localhost 即可使用。
 
@@ -146,9 +166,9 @@ func main() {
 		fmt.Printf("✓ 目录: %s\n", d)
 	}
 
-	// 创建文件并写入占位内容
+	// 创建文件并写入内容
 	for path, content := range files {
-		// 确保父目录存在（针对根目录下的文件）
+		// 确保父目录存在
 		dir := filepath.Dir(path)
 		if dir != "." {
 			if err := os.MkdirAll(dir, 0755); err != nil {
@@ -174,8 +194,11 @@ func main() {
 	entrypointPath := "backend/entrypoint.sh"
 	if err := os.Chmod(entrypointPath, 0755); err == nil {
 		fmt.Println("✓ 已设置 entrypoint.sh 可执行权限")
+	} else {
+		fmt.Printf("⚠ 设置执行权限失败（Windows 下可忽略）: %v\n", err)
 	}
 
 	fmt.Println("\n✅ 项目结构初始化完成！")
-	fmt.Println("提示：请根据实际需求修改各配置文件中的占位内容。")
+	fmt.Println("提示：所有占位文件均可直接编辑，无需手动清理。")
+	fmt.Println("下一步：进入 backend/ 目录执行 go mod init <模块名>")
 }
