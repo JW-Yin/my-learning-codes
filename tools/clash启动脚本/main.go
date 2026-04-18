@@ -125,24 +125,29 @@ func testNode(ctx context.Context, node ProxyNode, result chan<- ProxyNode) {
 }
 
 func main() {
-	fmt.Println("===== 第一个节点响应立即切换 =====")
-
-	// 1. 创建可取消的上下文（用于终止所有协程）
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), TestTimeout)
 	defer cancel()
 
-	// 2. 创建通道：只接收第一个完成的节点
 	result := make(chan ProxyNode, 1)
 
-	// 3. 启动所有协程（并发测速）
 	for _, node := range nodes {
 		go testNode(ctx, node, result)
 	}
 
-	// 4. 🔥 只等待第一个结果！拿到后立刻取消所有其他请求
-	bestNode := <-result
-	cancel() // 秒杀所有未完成的测速协程
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
 
-	// 5. 直接切换，无任何计算！
-	switchToNode(bestNode)
+	for {
+		select {
+		case <-ticker.C:
+			fmt.Print(".")
+		case bestNode := <-result:
+			cancel()
+			switchToNode(bestNode)
+			return
+		case <-ctx.Done():
+			fmt.Println("\n❌ 等待超时，所有节点均未响应，请检查网络或节点配置。")
+			return
+		}
+	}
 }
