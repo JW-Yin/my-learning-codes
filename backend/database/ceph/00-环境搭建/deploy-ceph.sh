@@ -266,6 +266,14 @@ deploy_all_mgrs() {
     docker exec "ceph-mon-$(get_node_name 0)" ceph -s | grep "mgr:"
 }
 
+# ---------- 健康优化 ----------
+post_config() {
+    info "执行健康优化配置"
+    local first_name=$(get_node_name 0)
+    docker exec "ceph-mon-$first_name" ceph mon enable-msgr2 || true
+    docker exec "ceph-mon-$first_name" ceph config set mon auth_allow_insecure_global_id_reclaim false || true
+}
+
 # ---------- 展示最终状态 ----------
 show_status() {
     echo "========================================="
@@ -285,6 +293,7 @@ main() {
     prepare
     deploy_all_mons
     deploy_all_mgrs
+    post_config
     show_status
 }
 
