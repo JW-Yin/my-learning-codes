@@ -33,6 +33,8 @@ sudo rm -rf /etc/ceph /var/lib/ceph* /tmp/ceph* /tmp/monmap
 #### 2. 创建 Docker 网络并拉取镜像
 
 ```bash
+# 安装 Ceph 基础工具 (提供 ceph-authtool, monmaptool 等)，安装 ceph-common，提供 ceph, rados 等命令行工具
+sudo dnf install -y ceph-base ceph-common
 docker network create --subnet=192.168.206.0/24 ceph-public
 docker pull quay.io/ceph/ceph:v17.2.8
 ```
