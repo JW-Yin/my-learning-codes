@@ -1,57 +1,64 @@
 
-## 📘 Ceph 集群手动部署（Docker 方式）
+# 📘 Ceph 集群演示部署指南（Docker 方式）
 
-### 一、部署环境与规划
-
-| 项目 | 说明 |
-| :--- | :--- |
-| **宿主机** | 单台 Fedora 系统（或其他 Linux 发行版） |
-| **容器引擎** | Docker（已安装并启动） |
-| **Ceph 镜像** | `quay.io/ceph/ceph:v17.2.8`（Quincy 版本） |
-| **网络** | 自定义 Docker 桥接网络 `ceph-public`，子网 `192.168.206.0/24` |
-| **节点规划** | 三节点，每个节点运行一个 MON 和一个 MGR |
-
-| 节点名称 | IP 地址 |
-| :--- | :--- |
-| `ceph-node1` | `192.168.206.151` |
-| `ceph-node2` | `192.168.206.152` |
-| `ceph-node3` | `192.168.206.153` |
+> **适用场景**：单机快速搭建 Ceph 集群进行功能演示、K8s 对接测试。  
+> **集群架构**：3 MON + 3 MGR + 3 OSD（高可用最小集）  
+> **存储能力**：**RBD 块存储**（开箱即用）、CephFS（可选）、RGW（可选）
 
 ---
 
-### 二、前置准备
+## 一、环境与规划
 
-#### 1. 清理旧环境（如有）
+| 项目 | 说明 |
+| :--- | :--- |
+| **宿主机** | Linux（Fedora/Ubuntu/CentOS），已安装 Docker |
+| **Ceph 版本** | Quincy（`quay.io/ceph/ceph:v17.2.8`） |
+| **网络** | Docker 桥接网络 `ceph-public`，子网 `192.168.206.0/24` |
+| **节点规划** | 三个逻辑节点，每个节点运行 MON + MGR + OSD |
 
+| 节点名称 | IP 地址 | 角色 |
+| :--- | :--- | :--- |
+| `ceph-node1` | `192.168.206.151` | MON + MGR + OSD |
+| `ceph-node2` | `192.168.206.152` | MON + MGR + OSD |
+| `ceph-node3` | `192.168.206.153` | MON + MGR + OSD |
+
+---
+
+## 二、演示前置准备
+
+### 1. 安装宿主机工具
 ```bash
-docker ps -a | grep ceph- | awk '{print $1}' | xargs -r docker rm -f
-docker rm -f temp-net-holder 2>/dev/null || true
-docker network rm ceph-public 2>/dev/null || true
-sudo rm -rf /etc/ceph /var/lib/ceph* /tmp/ceph* /tmp/monmap
+# Fedora
+sudo dnf install -y ceph-base ceph-common
+
+# Ubuntu
+sudo apt update && sudo apt install -y ceph-base ceph-common
 ```
 
-#### 2. 创建 Docker 网络并拉取镜像
-
+### 2. 清理旧环境（如有）
 ```bash
-# 安装 Ceph 基础工具 (提供 ceph-authtool, monmaptool 等)，安装 ceph-common，提供 ceph, rados 等命令行工具
-sudo dnf install -y ceph-base ceph-common
+docker ps -a | grep ceph- | awk '{print $1}' | xargs -r docker rm -f
+docker network rm ceph-public 2>/dev/null || true
+sudo rm -rf /etc/ceph /var/lib/ceph* /tmp/ceph* /tmp/monmap /var/lib/ceph-osd-disks
+```
+
+### 3. 创建网络与拉取镜像
+```bash
 docker network create --subnet=192.168.206.0/24 ceph-public
 docker pull quay.io/ceph/ceph:v17.2.8
 ```
 
-#### 3. 生成集群唯一标识符（FSID）
-
+### 4. 生成集群 FSID
 ```bash
 export FSID=$(uuidgen)
-echo "FSID: $FSID"   # 记录这个值，后续会用到
+echo "集群 FSID: $FSID"   # 记录备用
 ```
 
 ---
 
-### 三、部署第一个 MON 节点（`ceph-node1`）
+## 三、部署第一个 MON（`ceph-node1`）
 
-#### 1. 创建基础目录和初始配置文件
-
+### 1. 创建基础目录和配置文件
 ```bash
 sudo mkdir -p /etc/ceph /var/lib/ceph/mon/ceph-ceph-node1
 
@@ -69,27 +76,25 @@ osd_pool_default_min_size = 1
 EOF
 ```
 
-#### 2. 生成密钥环和 monmap
-
+### 2. 生成密钥环和 monmap
 ```bash
-# 生成 mon. 密钥环
+# mon. 密钥
 sudo ceph-authtool --create-keyring /tmp/ceph.mon.keyring --gen-key -n mon. --cap mon 'allow *'
 
-# 生成 client.admin 密钥环（管理员权限）
+# client.admin 密钥
 sudo ceph-authtool --create-keyring /etc/ceph/ceph.client.admin.keyring --gen-key -n client.admin \
   --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
 
-# 将 admin 密钥导入 mon 密钥环
+# 合并密钥
 sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /etc/ceph/ceph.client.admin.keyring
 
-# 生成只包含 node1 的 monmap
+# 生成 monmap
 monmaptool --create --add ceph-node1 192.168.206.151 --fsid $FSID /tmp/monmap
 ```
 
-#### 3. 初始化 MON 数据目录并启动容器
-
+### 3. 初始化 MON 数据目录并启动容器
 ```bash
-# 初始化数据目录（--mkfs）
+# 初始化（--mkfs）
 sudo docker run --rm \
   -v /var/lib/ceph:/var/lib/ceph:z \
   -v /etc/ceph:/etc/ceph:z \
@@ -98,7 +103,7 @@ sudo docker run --rm \
   ceph-mon --mkfs -i ceph-node1 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring \
   --public-addr 192.168.206.151
 
-# 修正权限（容器内 ceph 用户 UID 为 167）
+# 修正权限（容器内 ceph 用户 UID=167）
 sudo chown -R 167:167 /var/lib/ceph /etc/ceph
 
 # 启动 MON 容器
@@ -113,44 +118,38 @@ docker run -d \
   ceph-mon -i ceph-node1 -f
 ```
 
-#### 4. 验证单节点状态
-
+### 4. 验证单节点状态
 ```bash
 sleep 10
 docker exec ceph-mon-ceph-node1 ceph -s
 ```
-
-预期看到 `mon: 1 daemons, quorum ceph-node1`。
+预期输出：`mon: 1 daemons, quorum ceph-node1`
 
 ---
 
-### 四、动态添加第二个 MON 节点（`ceph-node2`）
+## 四、添加第二个 MON（`ceph-node2`）
 
-#### 1. 从集群导出当前 monmap
-
+### 1. 导出当前 monmap 和密钥
 ```bash
 docker exec ceph-mon-ceph-node1 ceph mon getmap -o /tmp/monmap
 docker cp ceph-mon-ceph-node1:/tmp/monmap /tmp/monmap
 ```
 
-#### 2. 准备 node2 的独立配置和数据目录
-
+### 2. 准备 node2 配置目录
 ```bash
 sudo mkdir -p /etc/ceph-mon-ceph-node2 /var/lib/ceph-mon-ceph-node2/mon/ceph-ceph-node2
 
-# 复制基础文件
 sudo cp /etc/ceph/ceph.conf /etc/ceph-mon-ceph-node2/ceph.conf
 sudo cp /etc/ceph/ceph.client.admin.keyring /etc/ceph-mon-ceph-node2/
 sudo cp /tmp/ceph.mon.keyring /etc/ceph-mon-ceph-node2/
 sudo cp /tmp/monmap /etc/ceph-mon-ceph-node2/
 
-# 修改配置文件，加入 node2 的信息
+# 修改配置，加入 node2 信息
 sudo sed -i 's/mon_initial_members = ceph-node1/mon_initial_members = ceph-node1,ceph-node2/' /etc/ceph-mon-ceph-node2/ceph.conf
 sudo sed -i 's/mon_host = 192.168.206.151/mon_host = 192.168.206.151,192.168.206.152/' /etc/ceph-mon-ceph-node2/ceph.conf
 ```
 
-#### 3. 初始化并启动 node2 容器
-
+### 3. 初始化并启动 node2 容器
 ```bash
 # 初始化
 sudo docker run --rm \
@@ -176,21 +175,18 @@ docker run -d \
   ceph-mon -i ceph-node2 -f
 ```
 
-#### 4. 验证
-
+### 4. 验证
 ```bash
 sleep 10
 docker exec ceph-mon-ceph-node1 ceph -s
 ```
-
-预期看到 `mon: 2 daemons, quorum ceph-node1,ceph-node2`。
+预期输出：`mon: 2 daemons, quorum ceph-node1,ceph-node2`
 
 ---
 
-### 五、动态添加第三个 MON 节点（`ceph-node3`）
+## 五、添加第三个 MON（`ceph-node3`）
 
-#### 1. 准备 node3 的目录和配置
-
+### 1. 准备 node3 目录
 ```bash
 sudo mkdir -p /etc/ceph-mon-ceph-node3 /var/lib/ceph-mon-ceph-node3/mon/ceph-ceph-node3
 
@@ -199,13 +195,12 @@ sudo cp /etc/ceph/ceph.client.admin.keyring /etc/ceph-mon-ceph-node3/
 sudo cp /tmp/ceph.mon.keyring /etc/ceph-mon-ceph-node3/
 sudo cp /tmp/monmap /etc/ceph-mon-ceph-node3/
 
-# 修改配置文件，加入三个节点信息
+# 修改配置，加入三个节点信息
 sudo sed -i 's/mon_initial_members = ceph-node1/mon_initial_members = ceph-node1,ceph-node2,ceph-node3/' /etc/ceph-mon-ceph-node3/ceph.conf
 sudo sed -i 's/mon_host = 192.168.206.151/mon_host = 192.168.206.151,192.168.206.152,192.168.206.153/' /etc/ceph-mon-ceph-node3/ceph.conf
 ```
 
-#### 2. 初始化并启动 node3 容器
-
+### 2. 初始化并启动 node3 容器
 ```bash
 # 初始化
 sudo docker run --rm \
@@ -231,31 +226,25 @@ docker run -d \
   ceph-mon -i ceph-node3 -f
 ```
 
-#### 3. 回头更新 node1 的配置并重启
-
+### 3. 更新 node1 配置并重启
 ```bash
 sudo sed -i 's/mon_initial_members = ceph-node1/mon_initial_members = ceph-node1,ceph-node2,ceph-node3/' /etc/ceph/ceph.conf
 sudo sed -i 's/mon_host = 192.168.206.151/mon_host = 192.168.206.151,192.168.206.152,192.168.206.153/' /etc/ceph/ceph.conf
 docker restart ceph-mon-ceph-node1
 ```
 
-#### 4. 验证
-
+### 4. 验证三 MON 就绪
 ```bash
 sleep 10
 docker exec ceph-mon-ceph-node1 ceph -s
 ```
-
-预期看到 `mon: 3 daemons, quorum ceph-node1,ceph-node2,ceph-node3`。
+预期输出：`mon: 3 daemons, quorum ceph-node1,ceph-node2,ceph-node3`
 
 ---
 
-### 六、部署三个 MGR 节点
+## 六、部署三个 MGR（高可用管理节点）
 
-MGR 负责提供扩展功能和管理接口，三个 MGR 实现高可用（一个 active，两个 standby）。
-
-#### 1. 部署 `ceph-node1` 的 MGR
-
+### 1. 部署 node1 的 MGR
 ```bash
 # 创建密钥
 docker exec ceph-mon-ceph-node1 ceph auth get-or-create mgr.ceph-node1 mon 'allow profile mgr' osd 'allow *' mds 'allow *' \
@@ -276,8 +265,7 @@ docker run -d \
   ceph-mgr -i ceph-node1 -f
 ```
 
-#### 2. 部署 `ceph-node2` 的 MGR
-
+### 2. 部署 node2 的 MGR
 ```bash
 docker exec ceph-mon-ceph-node1 ceph auth get-or-create mgr.ceph-node2 mon 'allow profile mgr' osd 'allow *' mds 'allow *' \
   -o /etc/ceph/ceph.mgr.ceph-node2.keyring
@@ -295,8 +283,7 @@ docker run -d \
   ceph-mgr -i ceph-node2 -f
 ```
 
-#### 3. 部署 `ceph-node3` 的 MGR
-
+### 3. 部署 node3 的 MGR
 ```bash
 docker exec ceph-mon-ceph-node1 ceph auth get-or-create mgr.ceph-node3 mon 'allow profile mgr' osd 'allow *' mds 'allow *' \
   -o /etc/ceph/ceph.mgr.ceph-node3.keyring
@@ -314,50 +301,147 @@ docker run -d \
   ceph-mgr -i ceph-node3 -f
 ```
 
-#### 4. 验证 MGR 状态
-
+### 4. 验证 MGR 状态
 ```bash
 docker exec ceph-mon-ceph-node1 ceph -s
 ```
-
-预期看到 `mgr: ceph-node1(active), standbys: ceph-node2, ceph-node3`。
+预期输出：`mgr: ceph-node1(active), standbys: ceph-node2, ceph-node3`
 
 ---
 
-### 七、消除部分健康警告（可选）
+## 七、添加三个 OSD（存储节点）
 
+### 1. 创建虚拟磁盘（loop 设备）
 ```bash
-docker exec ceph-mon-ceph-node1 ceph mon enable-msgr2
-docker exec ceph-mon-ceph-node1 ceph config set mon auth_allow_insecure_global_id_reclaim false
+sudo mkdir -p /var/lib/ceph-osd-disks
+for i in 1 2 3; do
+    sudo dd if=/dev/zero of=/var/lib/ceph-osd-disks/osd-node${i}.img bs=1M count=0 seek=10240
+    sudo losetup /dev/loop$((10+$i)) /var/lib/ceph-osd-disks/osd-node${i}.img
+done
 ```
 
-此时集群只剩下 `OSD count 0 < osd_pool_default_size 1` 的警告，表示存储层未部署，属于正常状态。
+### 2. 生成并分发 bootstrap-osd 密钥
+```bash
+# 获取密钥
+docker exec ceph-mon-ceph-node1 ceph auth get-or-create client.bootstrap-osd mon 'allow profile bootstrap-osd' > /tmp/bootstrap-osd.keyring
 
----
+# 分发到 node1
+docker exec ceph-mon-ceph-node1 mkdir -p /var/lib/ceph/bootstrap-osd
+docker cp /tmp/bootstrap-osd.keyring ceph-mon-ceph-node1:/var/lib/ceph/bootstrap-osd/ceph.keyring
+docker exec ceph-mon-ceph-node1 chown -R 167:167 /var/lib/ceph/bootstrap-osd
 
-### 八、最终状态
+# 分发到 node2/node3
+for N in 2 3; do
+    sudo mkdir -p /var/lib/ceph-mon-ceph-node${N}/bootstrap-osd
+    sudo cp /tmp/bootstrap-osd.keyring /var/lib/ceph-mon-ceph-node${N}/bootstrap-osd/ceph.keyring
+    sudo mkdir -p /etc/ceph-mon-ceph-node${N}
+    sudo cp /tmp/bootstrap-osd.keyring /etc/ceph-mon-ceph-node${N}/ceph.client.bootstrap-osd.keyring
+    sudo chown -R 167:167 /var/lib/ceph-mon-ceph-node${N}/bootstrap-osd /etc/ceph-mon-ceph-node${N}
+done
+```
 
-运行以下命令查看完整集群状态：
+### 3. 重建 MON 容器以挂载磁盘
+```bash
+# Node1
+docker stop ceph-mon-ceph-node1 && docker rm ceph-mon-ceph-node1
+docker run -d --name ceph-mon-ceph-node1 --network ceph-public --ip 192.168.206.151 \
+  -v /var/lib/ceph:/var/lib/ceph:z -v /etc/ceph:/etc/ceph:z \
+  --device /dev/loop11:/dev/sdb --cap-add SYS_ADMIN \
+  quay.io/ceph/ceph:v17.2.8 ceph-mon -i ceph-node1 -f
 
+# Node2
+docker stop ceph-mon-ceph-node2 && docker rm ceph-mon-ceph-node2
+docker run -d --name ceph-mon-ceph-node2 --network ceph-public --ip 192.168.206.152 \
+  -v /var/lib/ceph-mon-ceph-node2:/var/lib/ceph:z -v /etc/ceph-mon-ceph-node2:/etc/ceph:z \
+  --device /dev/loop12:/dev/sdb --cap-add SYS_ADMIN \
+  quay.io/ceph/ceph:v17.2.8 ceph-mon -i ceph-node2 -f
+
+# Node3
+docker stop ceph-mon-ceph-node3 && docker rm ceph-mon-ceph-node3
+docker run -d --name ceph-mon-ceph-node3 --network ceph-public --ip 192.168.206.153 \
+  -v /var/lib/ceph-mon-ceph-node3:/var/lib/ceph:z -v /etc/ceph-mon-ceph-node3:/etc/ceph:z \
+  --device /dev/loop13:/dev/sdb --cap-add SYS_ADMIN \
+  quay.io/ceph/ceph:v17.2.8 ceph-mon -i ceph-node3 -f
+```
+
+### 4. 在每个容器内添加 OSD
+以下操作在 **三个容器内分别执行一次**（以 node1 为例，进入容器后粘贴全部命令）：
+
+```bash
+# 进入容器
+docker exec -it ceph-mon-ceph-node1 bash
+
+# 粘贴执行以下命令块
+OSD_FSID=$(uuidgen)
+OSD_SECRET=$(ceph-authtool --gen-print-key)
+echo "FSID: $OSD_FSID"
+echo "Secret: $OSD_SECRET"
+
+OSD_ID=$(echo "{\"cephx_secret\": \"$OSD_SECRET\"}" | \
+  ceph osd new $OSD_FSID -i - \
+  -n client.bootstrap-osd \
+  --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring)
+echo "Allocated OSD ID: $OSD_ID"
+
+mkdir -p /var/lib/ceph/osd/ceph-$OSD_ID
+ln -s /dev/sdb /var/lib/ceph/osd/ceph-$OSD_ID/block
+
+ceph-authtool --create-keyring /var/lib/ceph/osd/ceph-$OSD_ID/keyring \
+  --name osd.$OSD_ID --add-key $OSD_SECRET
+
+ceph-osd -i $OSD_ID --mkfs --osd-uuid $OSD_FSID
+chown -R ceph:ceph /var/lib/ceph/osd/ceph-$OSD_ID
+ceph-osd -i $OSD_ID -f &
+
+# 验证
+ceph osd tree
+exit
+```
+
+**注意**：node2 和 node3 的容器名称分别为 `ceph-mon-ceph-node2` 和 `ceph-mon-ceph-node3`，进入后执行完全相同的命令块即可。
+
+### 5. 最终集群状态验证
 ```bash
 docker exec ceph-mon-ceph-node1 ceph -s
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
 ```
+预期输出：
+```
+  cluster:
+    id:     <fsid>
+    health: HEALTH_OK  (或 HEALTH_WARN 仅因单副本配置)
 
-你应该拥有：
-- 3 个 MON 容器（`ceph-mon-ceph-node1/2/3`）
-- 3 个 MGR 容器（`ceph-mgr-ceph-node1/2/3`）
-- 集群控制平面高可用已建立
+  services:
+    mon: 3 daemons, quorum ceph-node1,ceph-node2,ceph-node3
+    mgr: ceph-node1(active), standbys: ceph-node2, ceph-node3
+    osd: 3 osds: 3 up, 3 in
+```
 
 ---
 
-### 九、补充说明
+## 八、演示要点总结（面向导师）
 
-| 关键点 | 解释 |
-| :--- | :--- |
-| **动态扩容原理** | 通过导出集群当前的 monmap，让新节点“知道”已有集群成员，从而加入仲裁。 |
-| **配置文件分节点独立** | 为避免冲突，为每个非 node1 的节点创建了独立的 `/etc/ceph-mon-<node>` 目录，挂载到容器的 `/etc/ceph`。 |
-| **权限（UID 167）** | Ceph 容器内 `ceph` 用户 UID 固定为 167，因此宿主机目录需匹配该 UID 所有权。 |
-| **后续扩展** | 可以继续添加 OSD、创建存储池、启用 Dashboard 等。 |
+| 环节 | 演示内容 | 关键命令 |
+| :--- | :--- | :--- |
+| **1. 环境准备** | 清理旧环境、拉取镜像、创建网络 | `docker network create` |
+| **2. MON 部署** | 逐个启动 3 个 MON 容器，形成仲裁 | `docker exec ... ceph -s` 查看 quorum |
+| **3. MGR 部署** | 部署 3 个 MGR 实现管理高可用 | `ceph -s` 显示 active/standby |
+| **4. OSD 部署** | 使用 loop 设备模拟磁盘，添加 3 个 OSD | `ceph osd tree` 展示 OSD 上线 |
+| **5. 功能验证** | 集群健康、RBD 块存储可用 | 创建 Pool 和 RBD 镜像测试 |
+
+### 扩展说明（可口头陈述）
+- **RBD 块存储**：集群已原生支持，可直接创建 Pool 和 RBD 镜像，用于 K8s PV 供应。
+- **CephFS 文件存储**：需额外部署 MDS 服务（约 2 分钟），接口为 POSIX 文件系统。
+- **RGW 对象存储**：需额外部署 RGW 服务（约 2 分钟），提供 S3/Swift 兼容接口。
+
+---
+
+## 九、快速清理命令（演示后可选）
+```bash
+docker stop $(docker ps -aq --filter "name=ceph-")
+docker rm $(docker ps -aq --filter "name=ceph-")
+docker network rm ceph-public
+sudo rm -rf /etc/ceph /var/lib/ceph* /tmp/ceph* /tmp/monmap /var/lib/ceph-osd-disks
+for i in 11 12 13; do sudo losetup -d /dev/loop$i 2>/dev/null; done
+```
 
 ---
