@@ -400,6 +400,13 @@ exit
 
 **注意**：node2 和 node3 的容器名称分别为 `ceph-mon-ceph-node2` 和 `ceph-mon-ceph-node3`，进入后执行完全相同的命令块即可。
 
+```bash
+# 查看存储池名
+docker exec ceph-mon-ceph-node1 ceph osd pool ls
+# 将存储池设置为3副本机制
+docker exec ceph-mon-ceph-node1 ceph osd pool set [池名] size 3
+```
+
 ### 5. 最终集群状态验证
 ```bash
 docker exec ceph-mon-ceph-node1 ceph -s
@@ -408,7 +415,7 @@ docker exec ceph-mon-ceph-node1 ceph -s
 ```
   cluster:
     id:     <fsid>
-    health: HEALTH_OK  (或 HEALTH_WARN 仅因单副本配置)
+    health: HEALTH_OK 
 
   services:
     mon: 3 daemons, quorum ceph-node1,ceph-node2,ceph-node3
