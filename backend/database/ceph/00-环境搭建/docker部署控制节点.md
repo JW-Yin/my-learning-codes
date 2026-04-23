@@ -450,7 +450,7 @@ docker network rm ceph-public
 sudo rm -rf /etc/ceph /var/lib/ceph* /tmp/ceph* /tmp/monmap /var/lib/ceph-osd-disks
 for i in 11 12 13; do sudo losetup -d /dev/loop$i 2>/dev/null; done
 ```
-
+ 
 ---
 
 
