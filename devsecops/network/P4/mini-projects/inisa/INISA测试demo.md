@@ -10,45 +10,70 @@
 
     h1 从本地缓存队列取出数据，实现零等待，形成闭环。
 
-📁 项目目录结构
-text
+---
 
+## 🌐 环境要求
+- Ubuntu 20.04/22.04（或 VM）
+- 已安装 [P4 Tutorials](https://github.com/p4lang/tutorials) 环境（包含 `p4c-bm2-ss`，`simple_switch_grpc`，`mininet`）
+- 确认 `~/tutorials/exercises/basic` 可正常 `make run`（表示环境完备）
+
+---
+
+## 📁 项目结构
+
+```
 ~/tutorials/exercises/inisa/
-├── inisa.p4
 ├── Makefile
+├── inisa.p4                    # P4 交换机程序
+├── h1.py                       # 训练节点
+├── h2.py                       # 存储节点
+├── controller.py               # 控制平面
 ├── pod-topo/
-│   ├── topology.json
-│   └── s1-runtime.json
-├── h1.py
-├── h2.py
-├── controller.py
-├── build/
-├── pcaps/
-└── logs/
+│   ├── topology.json            # 拓扑定义
+│   └── s1-runtime.json          # 转发表
+├── build/                      # 编译输出（自动生成）
+├── pcaps/                      # 抓包文件
+└── logs/                       # 日志
+```
 
-🚀 完整搭建步骤（复制粘贴即可）
-1. 进入教程目录并创建项目文件夹
-bash
+---
 
-cd ~/tutorials/exercises
-mkdir inisa
-cd inisa
-mkdir -p build pcaps logs pod-topo
-cp ../basic/Makefile .
+## 📝 第一步：创建项目目录并写入所有文件
 
-2. 编写 P4 程序 inisa.p4
-bash
+```bash
+mkdir -p ~/tutorials/exercises/inisa/pod-topo
+cd ~/tutorials/exercises/inisa
+```
 
-cat > inisa.p4 << 'EOF'
+### 1.1 写入 `Makefile`
+
+```bash
+cat > Makefile << 'EOF'
+BMV2_SWITCH_EXE = simple_switch_grpc
+P4C = p4c-bm2-ss
+P4C_ARGS = --p4v 16 --p4runtime-files $(BUILD_DIR)/inisa.p4.p4info.txtpb -o $(BUILD_DIR)/inisa.json
+P4_FILE = inisa.p4
+TOPO = pod-topo/topology.json
+RUN_PY = ../../utils/run_exercise.py
+
+include ../../utils/Makefile
+EOF
+```
+
+### 1.2 写入 `inisa.p4`（P4 交换机程序）
+
+```bash
+cat > inisa.p4 << 'P4EOF'
 #include <core.p4>
 #include <v1model.p4>
 
-const bit<16> TDTP_PORT = 0x270F;
+const bit<16> TDTP_PORT = 0x270F;  // 9999
 
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 
+// ===== 标准头部 =====
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
@@ -77,6 +102,7 @@ header udp_t {
     bit<16> checksum;
 }
 
+// ===== 自定义 TDTP 头部 =====
 header tdtp_t {
     bit<8>  opcode;
     bit<8>  task_id;
@@ -91,6 +117,7 @@ header tdtp_t {
 }
 
 struct metadata { }
+
 struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
@@ -98,6 +125,7 @@ struct headers {
     tdtp_t       tdtp;
 }
 
+// ===== 解析器 =====
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
@@ -106,7 +134,7 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             0x0800: parse_ipv4;
-            0x0806: accept;
+            0x0806: accept;    // ARP 直接放行
             default: accept;
         }
     }
@@ -130,10 +158,12 @@ parser MyParser(packet_in packet,
     }
 }
 
+// ===== 校验和验证（空） =====
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
     apply { }
 }
 
+// ===== 入口处理：IPv4 路由 =====
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
@@ -158,15 +188,18 @@ control MyIngress(inout headers hdr,
         if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
         }
+        // 非 IPv4 包交给交换机泛洪处理
     }
 }
 
+// ===== 出口处理（空） =====
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
     apply { }
 }
 
+// ===== 校验和计算：必须更新 IPv4 校验和 =====
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     apply {
         update_checksum(
@@ -181,6 +214,7 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
+// ===== 逆解析器 =====
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
@@ -198,11 +232,12 @@ V1Switch(
     MyComputeChecksum(),
     MyDeparser()
 ) main;
-EOF
+P4EOF
+```
 
-3. 编写拓扑文件 pod-topo/topology.json
-bash
+### 1.3 写入 `pod-topo/topology.json`
 
+```bash
 cat > pod-topo/topology.json << 'EOF'
 {
     "hosts": {
@@ -231,10 +266,11 @@ cat > pod-topo/topology.json << 'EOF'
     ]
 }
 EOF
+```
 
-4. 编写运行时配置 pod-topo/s1-runtime.json
-bash
+### 1.4 写入 `pod-topo/s1-runtime.json`
 
+```bash
 cat > pod-topo/s1-runtime.json << 'EOF'
 {
   "target": "bmv2",
@@ -262,25 +298,13 @@ cat > pod-topo/s1-runtime.json << 'EOF'
   ]
 }
 EOF
+```
 
-5. 修改 Makefile
-bash
+### 1.5 写入三个 Python 脚本
 
-cat > Makefile << 'EOF'
-BMV2_SWITCH_EXE = simple_switch_grpc
-P4C = p4c-bm2-ss
-P4C_ARGS = --p4v 16 --p4runtime-files $(BUILD_DIR)/inisa.p4.p4info.txtpb -o $(BUILD_DIR)/inisa.json
-P4_FILE = inisa.p4
-TOPO = pod-topo/topology.json
-RUN_PY = ../../utils/run_exercise.py
+#### `h1.py`（训练节点）
 
-include ../../utils/Makefile
-EOF
-
-6. 编写主机脚本
-h1.py (训练节点)
-bash
-
+```bash
 cat > h1.py << 'EOF'
 import socket, time, random, threading, queue
 
@@ -311,10 +335,11 @@ while True:
     sock.sendto(f"STATUS {batch} 0".encode(), CTRL)
     print(f"[h1] sent STATUS for batch {batch}")
 EOF
+```
 
-h2.py (存储节点)
-bash
+#### `h2.py`（存储节点）
 
+```bash
 cat > h2.py << 'EOF'
 import socket, time
 
@@ -329,14 +354,15 @@ while True:
     if msg.startswith("PREFETCH"):
         _, batch = msg.split()
         print(f"[h2] PREFETCH {batch}, preparing...")
-        time.sleep(2)
+        time.sleep(2)              # 模拟存储延迟 2 秒
         send_sock.sendto(batch.encode(), ('10.0.0.1', 8888))
         print(f"[h2] pushed batch {batch}")
 EOF
+```
 
-controller.py (控制平面)
-bash
+#### `controller.py`（控制平面）
 
+```bash
 cat > controller.py << 'EOF'
 import socket
 
@@ -356,64 +382,82 @@ while True:
         send_sock.sendto(f"PREFETCH {next_batch}".encode(), ('10.0.0.2', 7777))
         print(f"[ctrl] sent PREFETCH {next_batch}")
 EOF
+```
 
-🏃 启动与运行
-1. 编译并启动Mininet
-bash
+---
 
+## 🚀 第二步：编译并启动网络
+
+```bash
 cd ~/tutorials/exercises/inisa
 make run
+```
 
-看到 mininet> 提示符后，配置静态ARP（必须）：
-text
+如果编译成功，会看到：
+- `Inserting 3 table entries...`
+- `mininet>` 提示符
 
+---
+
+## 🔧 第三步：配置静态 ARP（每次启动都要执行）
+
+在 `mininet>` 中输入：
+
+```
 h1 arp -s 10.0.0.2 08:00:00:00:02:22
 h1 arp -s 10.0.0.3 08:00:00:00:03:33
 h2 arp -s 10.0.0.1 08:00:00:00:01:11
 h2 arp -s 10.0.0.3 08:00:00:00:03:33
 h3 arp -s 10.0.0.1 08:00:00:00:01:11
 h3 arp -s 10.0.0.2 08:00:00:00:02:22
+```
 
-测试网络：
-text
-
+验证连通性：
+```
 h1 ping 10.0.0.2
+```
+应返回 `ttl=63 time=...`
 
-应该通。
-2. 启动INISA脚本
+---
 
-在 mininet> 中依次执行（先控制平面，再存储，后训练）：
-text
+## 🎯 第四步：启动 INISA 极简 Demo
 
-h3 python3 -u controller.py > /tmp/ctrl.log 2>&1 &
-h2 python3 -u h2.py > /tmp/h2.log 2>&1 &
-h1 python3 -u h1.py > /tmp/h1.log 2>&1 &
+在 `mininet>` 中按顺序启动（先控制平面，再存储，最后训练）：
 
-3. 查看运行日志
+```
+h3 python3 -u controller.py &
+h2 python3 -u h2.py &
+h1 python3 -u h1.py &
+```
 
-等待几秒后，查看输出：
-text
+观察输出，你会看到：
+```
+[ctrl] waiting for STATUS...
+[h2] waiting for PREFETCH...
+[h1] cold start, request batch 1
+[ctrl] got STATUS 1
+[ctrl] sent PREFETCH 2
+[h2] PREFETCH 2, preparing...
+[h2] pushed batch 2
+[h1] got batch 2, training...
+[h1] sent STATUS for batch 2
+[ctrl] got STATUS 2
+[ctrl] sent PREFETCH 3
+...
+```
 
-h3 cat /tmp/ctrl.log
-h2 cat /tmp/h2.log
-h1 cat /tmp/h1.log
+**关键现象**：除冷启动外，h1 每次直接打印 `got batch X` 而无任何等待，证明预取成功隐藏了存储延迟。
 
-（也可以用 tail -f 实时观察）
-📖 预期输出
+---
 
-    controller.log：[ctrl] got STATUS 1 → [ctrl] sent PREFETCH 2 → got STATUS 2 → PREFETCH 3… 连续不断。
+## 🛑 停止 Demo
 
-    h2.log：[h2] PREFETCH 2, preparing... → 2秒后 [h2] pushed batch 2 → PREFETCH 3…
-
-    h1.log：[h1] cold start... → [h1] got batch 2, training... → sent STATUS for batch 2 → got batch 3… 始终无阻塞。
-
-🔧 停止和清理
-bash
-
+```
 h1 pkill -9 python3
 h2 pkill -9 python3
 h3 pkill -9 python3
-exit  # 退出mininet
-make clean
+```
 
-这就完成了！ 整个Demo仅需复制粘贴上述命令，即可在任何P4教程VM上零基础复现INISA的推送预取逻辑。
+退出 Mininet：`exit`
+
+---
